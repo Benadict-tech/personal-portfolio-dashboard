@@ -1,5 +1,5 @@
+import Link from "next/link";
 export default function Home() {
-  
   return (
     <div className="flex justify-center min-h-screen items-center flex-col gap-8 bg-gradient-to-r from-gray-300 to-gray-400 ">
       <div className="flex justify-center items-center flex-col gap-8 border-2 border-gray-300 rounded-lg p-8 bg-zinc-200 shadow-xl ">
@@ -43,7 +43,7 @@ export default function Home() {
           </p>
         </div>
       </div>
-      <div  className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 p-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 p-4">
         <div className="flex flex-col justify-center items-center p-2 border-2 border-black rounded-lg  bg-black shadow-white-2xl">
           <h3 className="text-2xl text-white font-bold">Todo list</h3>
           <p className="text-white">A website to organize out activity</p>
@@ -56,8 +56,17 @@ export default function Home() {
           <h3 className="text-2xl text-white font-bold">E-commerce</h3>
           <p className="text-white">A website to sell our products</p>
         </div>
-        
       </div>
+      <div>
+        <h2 className="text-2xl font-bold">Get in touch</h2>
+        <p className="text-xl">Feel free to reach out to me for any inquiries!</p>
+        <Link href="/contact" className="text-3xl  text-purple-950 animate-pulse">Contact Here</Link>
+        <span className="text-l text-gray-500">click here</span>
+      </div> 
+      <footer className="text-center p-4 text-gray-500">
+        &copy; {new Date().getFullYear()} Personal Portfolio Dashboard. All
+        rights reserved.
+      </footer>
     </div>
   );
 }
