@@ -1,6 +1,7 @@
 export default function Home() {
+  
   return (
-    <div className="flex justify-center h-screen items-center flex-col gap-8 bg-gradient-to-r from-gray-300 to-gray-400">
+    <div className="flex justify-center min-h-screen items-center flex-col gap-8 bg-gradient-to-r from-gray-300 to-gray-400 ">
       <div className="flex justify-center items-center flex-col gap-8 border-2 border-gray-300 rounded-lg p-8 bg-zinc-200 shadow-xl ">
         <h1 className="text-4xl font-bold">
           Welcome to the Personal Portfolio Dashboard!

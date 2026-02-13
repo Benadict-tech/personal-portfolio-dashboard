@@ -2,7 +2,7 @@ import Link from 'next/link'
 export default function NavBar() {
     return(
         <div>
-            <nav className="bg-black h-20 flex items-center justify-between px-8">
+            <nav className="bg-black h-20 flex items-center justify-between px-8 sticky top-0 z-50">
             <div>
                 <h1 className="text-white text-2xl font-bold">Personal Portfolio Dashboard</h1>
             </div>

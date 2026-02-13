@@ -1,7 +1,7 @@
 
 export default function ProjectCard({image, title, description}){
     return(
-        <div className="flex flex-col justify-center items-center bg-white rounded-lg  shadow-md p-4">
+        <div className="flex flex-col justify-center items-center bg-white rounded-lg  shadow-md p-4 hover:shadow-lg transition-shadow duration-300">
             <div className="p-1">
                 <img src={image} alt={title}/>
             </div>
