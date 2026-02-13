@@ -76,7 +76,7 @@ export const MOCK_PROJECT_DETAIL = [
     image: imgArray[0].src,
     techStack: ["Next.js", "MongoDB", "Tailwind CSS"],
     gitLink:"www.github.com/benliu/todo-list",
-    LiveDemoLink:"www.todo-list.com"
+    liveDemoLink:"www.todo-list.com"
   },
   {
     id: 2,
@@ -86,7 +86,7 @@ export const MOCK_PROJECT_DETAIL = [
     image: imgArray[1].src,
     techStack: ["Next.js", "MongoDB", "Tailwind CSS"],
     gitLink:"www.github.com/benliu/blog",
-    LiveDemoLink:"www.blog.com"
+    liveDemoLink:"www.blog.com"
   },
   {
     id: 3,
@@ -96,7 +96,7 @@ export const MOCK_PROJECT_DETAIL = [
     image: imgArray[2].src,
     techStack: ["Next.js", "MongoDB", "Tailwind CSS"],
     gitLink:"www.github.com/benliu/e-commerce",
-    LiveDemoLink:"www.e-commerce.com"
+    liveDemoLink:"www.e-commerce.com"
   },
   {
     id: 4,
@@ -106,7 +106,7 @@ export const MOCK_PROJECT_DETAIL = [
     image: imgArray[3].src,
     techStack: ["Next.js", "MongoDB", "Tailwind CSS"],
     gitLink:"www.github.com/benliu/portfolio",
-    LiveDemoLink:"www.portfolio.com" 
+    liveDemoLink:"www.portfolio.com" 
     },
     {
     id: 5,
@@ -116,7 +116,7 @@ export const MOCK_PROJECT_DETAIL = [
     image: imgArray[4].src,
     techStack: ["Next.js", "MongoDB", "Tailwind CSS"],
     gitLink:"www.github.com/benliu/chat-app",
-    LiveDemoLink:"www.chat-app.com"
+    liveDemoLink:"www.chat-app.com"
     },
     {
     id: 6,
@@ -126,7 +126,7 @@ export const MOCK_PROJECT_DETAIL = [
     image: imgArray[5].src,
     techStack: ["Next.js", "MongoDB", "Tailwind CSS"],
     gitLink:"www.github.com/benliu/weather-app",
-    LiveDemoLink:"www.weather-app.com"
+    liveDemoLink:"www.weather-app.com"
     },
     {
     id: 7,
@@ -136,7 +136,7 @@ export const MOCK_PROJECT_DETAIL = [
     image: imgArray[6].src,
     techStack: ["Next.js", "MongoDB", "Tailwind CSS"],
     gitLink:"www.github.com/benliu/recipe-app",
-    LiveDemoLink:"www.recipe-app.com"
+    liveDemoLink:"www.recipe-app.com"
     },
     {
     id: 8,
@@ -146,7 +146,7 @@ export const MOCK_PROJECT_DETAIL = [
     image: imgArray[7].src,
     techStack: ["Next.js", "MongoDB", "Tailwind CSS"],
     gitLink:"www.github.com/benliu/fitness-app",
-    LiveDemoLink:"www.fitness-app.com"
+    liveDemoLink:"www.fitness-app.com"
     },
     {
     id: 9,
@@ -156,6 +156,6 @@ export const MOCK_PROJECT_DETAIL = [
     image: imgArray[8].src,
     techStack: ["Next.js", "MongoDB", "Tailwind CSS"],
     gitLink:"www.github.com/benliu/music-app",
-    LiveDemoLink:"www.music-app.com",
+    liveDemoLink:"www.music-app.com",
     }
 ];
