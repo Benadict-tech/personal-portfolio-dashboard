@@ -1,36 +1,41 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Us 💗 — A couple's shared planner
 
-## Getting Started
+A romantic Next.js app for long-distance couples: a shared day planner, common
+calendar, visit countdown, shared focus timer, future planner, and a money
+section (budget + savings goals + calculator) — all synced in real time
+through Supabase.
 
-First, run the development server:
+## Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- **Today** — personal tasks for each partner plus shared "ours" tasks;
+  see what your partner is doing today
+- **Calendar** — one common calendar, color-coded per person + shared events,
+  updates live when either partner edits
+- **Future** — a dream timeline (travel, home, wedding, goals) with target dates
+- **Money** — monthly budget tracker (₹ INR), savings goals with progress
+  bars, built-in calculator
+- **Timer** — live countdown to your next reunion + a customizable focus
+  timer: set a reason, pick any duration, run it solo or as a shared
+  "together" timer both partners see live, with a full session log
+- **Moods** — each partner sets how they feel (happy, missing you, sad,
+  angry…) and the other sees it live on the dashboard
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Setup
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+1. Create a free project at [supabase.com](https://supabase.com)
+2. In its **SQL Editor**, run the contents of `supabase/schema.sql`
+3. Copy `.env.local.example` to `.env.local` and fill in your project's
+   URL and anon key (Project Settings → API)
+4. `npm install && npm run dev`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+On first load each partner picks "Heart One" or "Heart Two" and enters their
+name — this stays on their device (localStorage). No passwords needed.
 
-## Learn More
+> Note: this intentionally has no auth — anyone with your anon key could
+> read/write the data. Fine for a private two-person demo; add Supabase
+> Auth later if you want real privacy.
 
-To learn more about Next.js, take a look at the following resources:
+## Deploy
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Deploy to Vercel and set the same two env vars in project settings. Both
+partners just open the same URL.

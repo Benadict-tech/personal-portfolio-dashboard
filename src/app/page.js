@@ -1,72 +1,138 @@
+"use client";
+
 import Link from "next/link";
+import CountdownChip from "@/components/CountdownChip";
+import LoveMeter from "@/components/LoveMeter";
+import { Fade, Page } from "@/components/Motion";
+import MoodCard from "@/components/MoodCard";
+import TaskColumn from "@/components/TaskColumn";
+import { useTable } from "@/lib/db";
+import { usePeople } from "@/lib/people";
+import { otherSlot } from "@/lib/identity";
+import { letterUnlocked } from "@/lib/letters";
+import { todayStr } from "@/lib/dates";
+import { isSupabaseConfigured } from "@/lib/supabase";
+
 export default function Home() {
+  const { me, mePerson, partner } = usePeople();
+  const { rows: tasks } = useTable("tasks", {
+    filter: (q) => q.eq("date", todayStr()),
+  });
+  const { rows: events } = useTable("events", {
+    filter: (q) => q.eq("date", todayStr()),
+  });
+  const { rows: letters } = useTable("letters");
+  const { rows: moods } = useTable("moods", { order: "updated_at" });
+
+  const slot = me?.slot || "a";
+  const mine = tasks.filter((t) => t.owner === slot);
+  const theirs = tasks.filter((t) => t.owner === otherSlot(slot));
+  const ours = tasks.filter((t) => t.owner === "shared");
+
+  const myMood = me && moods.find((m) => m.slot === me.slot)?.mood;
+  const unlockedLetters = letters.filter(
+    (l) => l.written_by === otherSlot(slot) && !l.opened && letterUnlocked(l, myMood)
+  );
+
+  const hour = new Date().getHours();
+  const greeting =
+    hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+
   return (
-    <div className="flex justify-center min-h-screen items-center flex-col gap-8 bg-gradient-to-r from-gray-300 to-gray-400 ">
-      <div className="flex justify-center items-center flex-col gap-8 border-2 border-gray-300 rounded-lg p-8 bg-zinc-200 shadow-xl ">
-        <h1 className="text-4xl font-bold">
-          Welcome to the Personal Portfolio Dashboard!
+    <Page className="pt-8">
+      <div className="text-center">
+        <h1 className="font-romantic text-6xl text-wine">
+          {greeting}, {me?.name || "love"}
         </h1>
-        <h3 className="text-2xl font-bold">The products towards future</h3>
-        <div className="w-180">
-          <p className="text-xl">
-            As a software developer, I’ve always been passionate about creating
-            things that can make people’s lives easier. I’ve been working on
-            various projects over the years, and I’m excited to share them with
-            you through this portfolio dashboard.
-          </p>
+        <p className="mt-1 text-sm opacity-70">
+          {new Date().toLocaleDateString(undefined, {
+            weekday: "long",
+            month: "long",
+            day: "numeric",
+          })}
+          {partner ? ` · thinking of ${partner.name} ${partner.emoji}` : ""}
+        </p>
+        <div className="mt-5">
+          <CountdownChip />
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 p-4">
-        <div className="flex flex-col justify-center items-center p-2 border-2 border-gray-300 rounded-lg bg-zinc-200 shadow-xl">
-          <h3 className="text-xl font-bold">Next.js</h3>
-          <p className="w-60">
-            Next.js is a React framework for building full-stack web
-            applications. You use React Components to build user interfaces.
-          </p>
-        </div>
+      {!isSupabaseConfigured && <PreviewNote />}
 
-        <div className="flex flex-col justify-center items-center p-2 border-2 border-gray-300  rounded-lg bg-zinc-200 shadow-xl">
-          <h3 className="text-xl font-bold">Python</h3>
-          <p className="w-60">
-            Python is a popular programming language for web development,
-            software development, mathematics, and system scripting.
-          </p>
-        </div>
+      <Fade delay={0.1}>
+        <MoodCard />
+      </Fade>
 
-        <div className="flex flex-col justify-center items-center p-2 border-2 border-gray-300 rounded-lg bg-zinc-200 shadow-xl">
-          <h3 className="text-xl font-bold">MongoDB</h3>
-          <p className="w-60">
-            MongoDB Community Edition is a distributed document database that
-            supports ad-hoc queries, secondary indexing, and real-time
-            aggregations
-          </p>
+      <Fade delay={0.15}>
+        <LoveMeter />
+      </Fade>
+
+      {unlockedLetters.length > 0 && (
+        <Fade delay={0.2}>
+          <Link
+            href="/letters"
+            className="card mt-8 p-4 flex items-center justify-center gap-3 font-bold text-wine hover:scale-[1.01] transition-transform"
+          >
+            <span className="text-2xl">💌</span>
+            {unlockedLetters.length === 1
+              ? `A letter just unlocked for you — "${unlockedLetters[0].title}"`
+              : `${unlockedLetters.length} letters just unlocked for you`}
+          </Link>
+        </Fade>
+      )}
+
+      {events.length > 0 && (
+        <div className="card mt-8 p-4 flex flex-wrap items-center gap-3">
+          <span className="font-bold text-wine">Today&apos;s plans:</span>
+          {events.map((e) => (
+            <span
+              key={e.id}
+              className="px-3 py-1 rounded-full bg-blush text-wine text-sm font-semibold"
+            >
+              {e.start_time && `${e.start_time} · `}
+              {e.title}
+            </span>
+          ))}
         </div>
+      )}
+
+      <div className="mt-8 grid gap-5 md:grid-cols-3">
+        <Fade delay={0.2}>
+          <TaskColumn
+            title={`${mePerson?.name || "My"} day`}
+            emoji={mePerson?.emoji || "💗"}
+            tasks={mine}
+            editable={Boolean(me)}
+            defaultOwner={slot}
+          />
+        </Fade>
+        <Fade delay={0.3}>
+          <TaskColumn
+            title="Our day"
+            emoji="💞"
+            tasks={ours}
+            editable={Boolean(me)}
+            defaultOwner="shared"
+          />
+        </Fade>
+        <Fade delay={0.4}>
+          <TaskColumn
+            title={`${partner?.name || "Partner"}'s day`}
+            emoji={partner?.emoji || "💙"}
+            tasks={theirs}
+            editable={false}
+            defaultOwner={otherSlot(slot)}
+          />
+        </Fade>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 p-4">
-        <div className="flex flex-col justify-center items-center p-2 border-2 border-black rounded-lg  bg-black shadow-white-2xl">
-          <h3 className="text-2xl text-white font-bold">Todo list</h3>
-          <p className="text-white">A website to organize out activity</p>
-        </div>
-        <div className="flex flex-col justify-center items-center p-2 border-2 border-black rounded-lg bg-black shadow-white-2xl">
-          <h3 className="text-2xl text-white font-bold">Blog</h3>
-          <p className="text-white">A website to share our thoughts</p>
-        </div>
-        <div className="flex flex-col justify-center items-center p-2 border-2 border-black rounded-lg bg-black shadow-white-3xl">
-          <h3 className="text-2xl text-white font-bold">E-commerce</h3>
-          <p className="text-white">A website to sell our products</p>
-        </div>
-      </div>
-      <div>
-        <h2 className="text-2xl font-bold">Get in touch</h2>
-        <p className="text-xl">Feel free to reach out to me for any inquiries!</p>
-        <Link href="/contact" className="text-3xl  text-purple-950 animate-pulse">Contact Here</Link>
-        <span className="text-l text-gray-500">click here</span>
-      </div> 
-      <footer className="text-center p-4 text-gray-500">
-        &copy; {new Date().getFullYear()} Personal Portfolio Dashboard. All
-        rights reserved.
-      </footer>
-    </div>
+    </Page>
+  );
+}
+
+function PreviewNote() {
+  return (
+    <p className="mt-6 text-center text-sm opacity-60">
+      Preview mode — connect Supabase to save and sync tasks between you two.
+    </p>
   );
 }
