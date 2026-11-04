@@ -31,7 +31,7 @@ export default function NavBar() {
           <span className="font-romantic text-3xl text-wine leading-none pt-1">Us</span>
         </Link>
 
-        <nav className="flex items-center gap-1 sm:gap-2 overflow-x-auto">
+        <nav className="flex items-center gap-1 sm:gap-2 overflow-x-auto no-scrollbar">
           {links.map(({ href, label, icon: Icon }) => {
             const active = pathname === href;
             return (
