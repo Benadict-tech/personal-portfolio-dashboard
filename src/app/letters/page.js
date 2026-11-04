@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import ConfirmDelete from "@/components/ConfirmDelete";
 import { Page } from "@/components/Motion";
+import VoiceButton, { appendVoice } from "@/components/VoiceButton";
 import { supabase } from "@/lib/supabase";
 import { runQuery, useTable } from "@/lib/db";
 import { usePeople } from "@/lib/people";
@@ -107,7 +108,7 @@ export default function LettersPage() {
                         💌
                       </motion.div>
                       <h3 className="mt-3 font-bold text-wine">{l.title}</h3>
-                      <div className="mt-3 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-rose to-rose-deep text-on-accent text-sm font-bold">
+                      <div className="mt-3 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-linear-to-r from-rose to-rose-deep text-on-accent text-sm font-bold">
                         <LockOpen size={14} /> It&apos;s time — open me
                       </div>
                       <p className="mt-2 text-xs opacity-60">{unlockHint(l, moodByKey)}</p>
@@ -169,7 +170,7 @@ export default function LettersPage() {
       <AnimatePresence>
         {opening && (
           <motion.div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--overlay)] p-4"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-(--overlay) p-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -247,7 +248,7 @@ function LetterForm({ onClose, refresh, me }) {
 
   return (
     <motion.div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--overlay)] p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-(--overlay) p-4"
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
       onClick={onClose}
     >
@@ -264,19 +265,28 @@ function LetterForm({ onClose, refresh, me }) {
           </button>
         </div>
 
-        <input
-          autoFocus
-          className="input-love mt-4"
-          placeholder="Open when you miss me…"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-        />
-        <textarea
-          className="input-love mt-3 h-36 resize-none"
-          placeholder="Pour your heart out… they'll read this exactly when they need it."
-          value={body}
-          onChange={(e) => setBody(e.target.value)}
-        />
+        <div className="mt-4 flex gap-2">
+          <input
+            autoFocus
+            className="input-love"
+            placeholder="Open when you miss me…"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+          <VoiceButton onResult={(t) => setTitle((v) => appendVoice(v, t))} />
+        </div>
+        <div className="relative mt-3">
+          <textarea
+            className="input-love h-36 resize-none pr-11"
+            placeholder="Pour your heart out… they'll read this exactly when they need it."
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+          />
+          <VoiceButton
+            className="absolute right-1.5 top-1.5"
+            onResult={(t) => setBody((v) => appendVoice(v, t))}
+          />
+        </div>
 
         <div className="mt-3 grid grid-cols-2 gap-2">
           <button

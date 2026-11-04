@@ -2,18 +2,23 @@
 -- Run this in your Supabase project's SQL editor.
 -- Safe to re-run: creates missing tables, resets policies idempotently.
 --
--- NOTE: This app intentionally has no auth (private couple demo).
--- Policies below are permissive for the anon key — anyone with the key
--- can read/write. Fine for a private project; add Supabase Auth later
--- if you want real security.
+-- SECURITY: access requires a Supabase Auth login AND a claimed heart
+-- (a `people` row whose user_id = auth.uid()). Logged-out visitors and
+-- signed-up strangers who haven't claimed a heart can see/change nothing.
+-- After both partners have claimed their hearts, also disable new signups:
+-- Dashboard → Authentication → Sign In / Providers → "Allow new users to sign up" off.
 
 create table if not exists people (
   id bigint generated always as identity primary key,
   slot text not null unique check (slot in ('a', 'b')),
   name text not null,
   emoji text not null default '💗',
+  user_id uuid unique, -- links a Supabase Auth account to a heart
   created_at timestamptz not null default now()
 );
+
+-- for databases created before auth existed
+alter table people add column if not exists user_id uuid;
 
 create table if not exists tasks (
   id bigint generated always as identity primary key,
@@ -152,6 +157,36 @@ create table if not exists letters (
   created_at timestamptz not null default now()
 );
 
+-- Per-visit itinerary: what we'll do when we're finally together
+create table if not exists itinerary_items (
+  id bigint generated always as identity primary key,
+  visit_id bigint not null references visits(id) on delete cascade,
+  day int not null default 1,
+  time text not null default '',
+  title text not null,
+  note text not null default '',
+  done boolean not null default false,
+  added_by text not null default 'a',
+  created_at timestamptz not null default now()
+);
+
+-- trips can span multiple days now (used by the itinerary builder)
+alter table visits add column if not exists end_date date;
+
+-- Shared games (tic-tac-heart). One row per match; board is a 9-cell jsonb array.
+create table if not exists games (
+  id bigint generated always as identity primary key,
+  type text not null default 'ttt',
+  status text not null default 'open' check (status in ('open', 'playing', 'done')),
+  x_slot text,
+  o_slot text,
+  board jsonb not null default '[null,null,null,null,null,null,null,null,null]'::jsonb,
+  turn text not null default 'x',
+  winner text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
 alter table people enable row level security;
 alter table tasks enable row level security;
 alter table events enable row level security;
@@ -166,42 +201,55 @@ alter table project_tasks enable row level security;
 alter table love_meter enable row level security;
 alter table love_log enable row level security;
 alter table letters enable row level security;
+alter table itinerary_items enable row level security;
+alter table games enable row level security;
 
-drop policy if exists "anon all people" on people;
-drop policy if exists "anon all tasks" on tasks;
-drop policy if exists "anon all events" on events;
-drop policy if exists "anon all visits" on visits;
-drop policy if exists "anon all milestones" on milestones;
-drop policy if exists "anon all savings_goals" on savings_goals;
-drop policy if exists "anon all budget_items" on budget_items;
-drop policy if exists "anon all moods" on moods;
-drop policy if exists "anon all focus_sessions" on focus_sessions;
-drop policy if exists "anon all projects" on projects;
-drop policy if exists "anon all project_tasks" on project_tasks;
-drop policy if exists "anon all love_meter" on love_meter;
-drop policy if exists "anon all love_log" on love_log;
-drop policy if exists "anon all letters" on letters;
+-- True only for a logged-in user who has claimed a heart. SECURITY DEFINER so
+-- it can read `people` without recursing through that table's own policies.
+create or replace function public.is_member()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (select 1 from public.people where user_id = auth.uid());
+$$;
 
-create policy "anon all people" on people for all using (true) with check (true);
-create policy "anon all tasks" on tasks for all using (true) with check (true);
-create policy "anon all events" on events for all using (true) with check (true);
-create policy "anon all visits" on visits for all using (true) with check (true);
-create policy "anon all milestones" on milestones for all using (true) with check (true);
-create policy "anon all savings_goals" on savings_goals for all using (true) with check (true);
-create policy "anon all budget_items" on budget_items for all using (true) with check (true);
-create policy "anon all moods" on moods for all using (true) with check (true);
-create policy "anon all focus_sessions" on focus_sessions for all using (true) with check (true);
-create policy "anon all projects" on projects for all using (true) with check (true);
-create policy "anon all project_tasks" on project_tasks for all using (true) with check (true);
-create policy "anon all love_meter" on love_meter for all using (true) with check (true);
-create policy "anon all love_log" on love_log for all using (true) with check (true);
-create policy "anon all letters" on letters for all using (true) with check (true);
+revoke all on function public.is_member() from public, anon;
+grant execute on function public.is_member() to authenticated;
+
+-- reset every policy (old permissive names + current names) so re-runs are clean
+do $$
+declare t text;
+begin
+  foreach t in array array['people','tasks','events','visits','milestones','savings_goals','budget_items','moods','focus_sessions','projects','project_tasks','love_meter','love_log','letters','itinerary_items','games'] loop
+    execute format('drop policy if exists %I on %I', 'anon all ' || t, t);
+    execute format('drop policy if exists %I on %I', 'members all ' || t, t);
+    if t <> 'people' then
+      execute format(
+        'create policy %I on %I for all to authenticated using (public.is_member()) with check (public.is_member())',
+        'members all ' || t, t
+      );
+    end if;
+  end loop;
+end $$;
+
+-- people: any signed-in user may see which hearts exist / are claimed (needed
+-- by the "pick your heart" screen), but can only claim a FREE heart or edit
+-- their own. No insert/delete from the client.
+drop policy if exists "people select" on people;
+drop policy if exists "people claim or edit own" on people;
+create policy "people select" on people for select to authenticated using (true);
+create policy "people claim or edit own" on people for update to authenticated
+  using (user_id is null or user_id = auth.uid())
+  with check (user_id = auth.uid());
 
 -- Realtime (idempotent: skip tables already in the publication)
 do $$
 declare t text;
 begin
-  foreach t in array array['people','tasks','events','visits','milestones','savings_goals','budget_items','moods','focus_sessions','projects','project_tasks','love_meter','love_log','letters'] loop
+  foreach t in array array['people','tasks','events','visits','milestones','savings_goals','budget_items','moods','focus_sessions','projects','project_tasks','love_meter','love_log','letters','itinerary_items','games'] loop
     if not exists (
       select 1 from pg_publication_tables
       where pubname = 'supabase_realtime' and tablename = t

@@ -34,7 +34,7 @@ export default function ConfirmDelete({ onConfirm, label, className, children })
       <AnimatePresence>
         {open && (
           <motion.div
-            className="fixed inset-0 z-[60] flex items-center justify-center bg-[var(--overlay)] p-4"
+            className="fixed inset-0 z-60 flex items-center justify-center bg-(--overlay) p-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}

@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import ConfirmDelete from "@/components/ConfirmDelete";
 import { Fade, Page } from "@/components/Motion";
+import VoiceButton, { appendVoice } from "@/components/VoiceButton";
 import { supabase } from "@/lib/supabase";
 import { runQuery, useTable } from "@/lib/db";
 import { usePeople } from "@/lib/people";
@@ -65,7 +66,7 @@ export default function WorksPage() {
             onClick={() => setSelectedId(p.id)}
             className={`px-4 py-2 rounded-full text-sm font-bold border-2 transition-all ${
               selected?.id === p.id
-                ? "border-rose-deep bg-gradient-to-r from-rose to-rose-deep text-on-accent shadow-lg"
+                ? "border-rose-deep bg-linear-to-r from-rose to-rose-deep text-on-accent shadow-lg"
                 : "border-line text-wine hover:border-rose"
             }`}
           >
@@ -284,6 +285,7 @@ function WorkStation({ person, fallback, tasks, editable, projectId, owner }) {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
             />
+            <VoiceButton onResult={(t) => setTitle((v) => appendVoice(v, t))} />
             <button type="submit" className="btn-love px-3" aria-label="Add task">
               <Plus size={15} />
             </button>
@@ -293,7 +295,7 @@ function WorkStation({ person, fallback, tasks, editable, projectId, owner }) {
 
       {/* stand + desk */}
       <div className="w-12 h-4 bg-desk rounded-b-lg" />
-      <div className="w-full h-4 rounded-xl bg-gradient-to-r from-[#e8b98a] via-[#d4a373] to-[#c68b59] shadow-md" />
+      <div className="w-full h-4 rounded-xl bg-linear-to-r from-[#e8b98a] via-[#d4a373] to-[#c68b59] shadow-md" />
       <div className="w-full flex justify-between px-6 mt-1 text-xl select-none" aria-hidden>
         <span title="chair">🪑</span>
         <span className="text-xs font-bold text-[#8a5a33] self-center">
@@ -372,6 +374,7 @@ function MeetingTable({ tasks, editable, projectId }) {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
+          <VoiceButton onResult={(t) => setTitle((v) => appendVoice(v, t))} />
           <button type="submit" className="btn-love px-3" aria-label="Add shared task">
             <Plus size={15} />
           </button>
@@ -399,7 +402,7 @@ function ProjectForm({ onClose }) {
 
   return (
     <motion.div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--overlay)] p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-(--overlay) p-4"
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
       onClick={onClose}
     >

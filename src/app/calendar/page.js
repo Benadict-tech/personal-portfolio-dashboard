@@ -17,6 +17,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, Heart, Plus, Trash, X } from "lucide-react";
 import ConfirmDelete from "@/components/ConfirmDelete";
 import { Page } from "@/components/Motion";
+import VoiceButton, { appendVoice } from "@/components/VoiceButton";
 import { supabase } from "@/lib/supabase";
 import { runQuery, useTable } from "@/lib/db";
 import { usePeople } from "@/lib/people";
@@ -106,7 +107,7 @@ export default function CalendarPage() {
               <button
                 key={d.toISOString()}
                 onClick={() => setSelected(d)}
-                className={`min-h-[64px] p-1.5 rounded-xl border text-left align-top transition-colors ${
+                className={`min-h-16 p-1.5 rounded-xl border text-left align-top transition-colors ${
                   sel
                     ? "border-rose-deep bg-blush"
                     : "border-transparent hover:bg-blush/60"
@@ -230,7 +231,7 @@ function EventForm({ date, me, ownerOrder, slotLabel, onClose }) {
 
   return (
     <motion.div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--overlay)] p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-(--overlay) p-4"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -251,13 +252,16 @@ function EventForm({ date, me, ownerOrder, slotLabel, onClose }) {
           </button>
         </div>
 
-        <input
-          autoFocus
-          className="input-love mt-4"
-          placeholder="What are we doing?"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-        />
+        <div className="mt-4 flex gap-2">
+          <input
+            autoFocus
+            className="input-love"
+            placeholder="What are we doing?"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+          <VoiceButton onResult={(t) => setTitle((v) => appendVoice(v, t))} />
+        </div>
 
         <div className="mt-3 grid grid-cols-2 gap-2">
           <input

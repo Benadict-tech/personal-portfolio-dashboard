@@ -4,6 +4,7 @@ import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Heart, Plus } from "lucide-react";
 import ConfirmDelete from "./ConfirmDelete";
+import VoiceButton, { appendVoice } from "./VoiceButton";
 import { runQuery } from "@/lib/db";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/lib/toast";
@@ -104,6 +105,7 @@ export default function TaskColumn({ title, emoji, tasks, editable, defaultOwner
             value={title_}
             onChange={(e) => setTitle(e.target.value)}
           />
+          <VoiceButton onResult={(t) => setTitle((v) => appendVoice(v, t))} />
           <button className="btn-love px-3" type="submit" aria-label="Add task">
             <Plus size={16} />
           </button>

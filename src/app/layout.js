@@ -9,7 +9,7 @@ import {
 } from "next/font/google";
 import "./globals.css";
 import NavBar from "@/components/NavBar";
-import IdentityPicker from "@/components/IdentityPicker";
+import AuthGate from "@/components/AuthGate";
 import SupabaseBanner from "@/components/SupabaseBanner";
 import FloatingHearts from "@/components/FloatingHearts";
 import { ToastProvider } from "@/lib/toast";
@@ -40,7 +40,7 @@ export default function RootLayout({ children }) {
           <NavBar />
           <SupabaseBanner />
           <main className="mx-auto max-w-6xl px-4 pb-20 relative">{children}</main>
-          <IdentityPicker />
+          <AuthGate />
         </ToastProvider>
       </body>
     </html>

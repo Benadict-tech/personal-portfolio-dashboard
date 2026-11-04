@@ -44,7 +44,7 @@ export default function CountdownChip() {
   return (
     <Link
       href="/timer"
-      className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-gradient-to-r from-rose to-rose-deep text-on-accent font-bold shadow-lg hover:scale-105 transition-transform"
+      className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-linear-to-r from-rose to-rose-deep text-on-accent font-bold shadow-lg hover:scale-105 transition-transform"
     >
       <Plane size={18} />
       {parts.d}d {parts.h}h {parts.m}m {parts.s}s until {visit.title}

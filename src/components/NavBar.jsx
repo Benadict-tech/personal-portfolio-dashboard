@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
-import { CalendarDays, Coins, Heart, LampDesk, ListTodo, Mail, Sparkles, Timer } from "lucide-react";
+import { CalendarDays, Coins, Gamepad2, Heart, LampDesk, ListTodo, LogOut, Mail, Map, Sparkles, Timer } from "lucide-react";
 import { usePeople } from "@/lib/people";
 import ThemePicker from "./ThemePicker";
 
@@ -15,11 +15,13 @@ const links = [
   { href: "/timer", label: "Timer", icon: Timer },
   { href: "/works", label: "Works", icon: LampDesk },
   { href: "/letters", label: "Letters", icon: Mail },
+  { href: "/trips", label: "Trips", icon: Map },
+  { href: "/play", label: "Play", icon: Gamepad2 },
 ];
 
 export default function NavBar() {
   const pathname = usePathname();
-  const { me, partner } = usePeople();
+  const { me, partner, signOut } = usePeople();
 
   return (
     <header className="sticky top-0 z-40 backdrop-blur-md bg-background/85 border-b border-line">
@@ -67,6 +69,15 @@ export default function NavBar() {
                 {partner ? `${partner.emoji} ${partner.name}` : "…"}
               </span>
             </div>
+          )}
+          {me && (
+            <button
+              onClick={signOut}
+              title="Sign out"
+              className="p-2 rounded-full text-rose-deep/70 hover:bg-blush hover:text-rose-deep transition-colors"
+            >
+              <LogOut size={16} />
+            </button>
           )}
           <ThemePicker />
         </div>

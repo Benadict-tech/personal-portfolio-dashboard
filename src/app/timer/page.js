@@ -60,15 +60,21 @@ export default function TimerPage() {
 
 function CountdownCard({ visit, parts, refresh, visits }) {
   const [date, setDate] = useState("");
+  const [endDate, setEndDate] = useState("");
   const [title, setTitle] = useState("Next visit");
   const toast = useToast();
 
   const save = async (e) => {
     e.preventDefault();
     if (!date || !supabase) return;
+    const payload = {
+      date,
+      end_date: endDate && endDate > date ? endDate : null,
+      title: title || "Next visit",
+    };
     const query = visit
-      ? supabase.from("visits").update({ date, title: title || "Next visit" }).eq("id", visit.id)
-      : supabase.from("visits").insert({ date, title: title || "Next visit" });
+      ? supabase.from("visits").update(payload).eq("id", visit.id)
+      : supabase.from("visits").insert(payload);
     if (await runQuery(query, toast, "Countdown updated ✈️")) refresh();
   };
 
@@ -90,7 +96,7 @@ function CountdownCard({ visit, parts, refresh, visits }) {
             [parts.m, "min"],
             [parts.s, "sec"],
           ].map(([v, label]) => (
-            <div key={label} className="rounded-2xl bg-gradient-to-b from-blush to-card border border-line py-4">
+            <div key={label} className="rounded-2xl bg-linear-to-b from-blush to-card border border-line py-4">
               <div className="text-3xl font-extrabold text-rose-deep tabular-nums">
                 {String(v).padStart(2, "0")}
               </div>
@@ -120,10 +126,19 @@ function CountdownCard({ visit, parts, refresh, visits }) {
             value={date}
             onChange={(e) => setDate(e.target.value)}
           />
+          <input
+            type="date"
+            className="input-love text-sm"
+            value={endDate}
+            min={date}
+            onChange={(e) => setEndDate(e.target.value)}
+            title="Trip end date (optional — unlocks multi-day itinerary)"
+          />
           <button className="btn-love text-sm whitespace-nowrap" disabled={!date}>
             <Heart size={14} /> {visit ? "Update" : "Set date"}
           </button>
         </div>
+        <p className="text-[10px] opacity-50 text-left">first date = arrival · second = trip end (optional)</p>
       </form>
 
       {visits.filter((v) => v.id !== visit?.id).length > 0 && (

@@ -11,7 +11,7 @@ export function useToast() {
 }
 
 const STYLES = {
-  success: "bg-gradient-to-r from-rose to-rose-deep text-on-accent",
+  success: "bg-linear-to-r from-rose to-rose-deep text-on-accent",
   error: "bg-desk text-white",
   info: "bg-card border border-line text-wine",
 };
@@ -35,7 +35,7 @@ export function ToastProvider({ children }) {
   return (
     <ToastContext.Provider value={toast}>
       {children}
-      <div className="fixed bottom-4 right-4 z-[70] flex flex-col items-end gap-2 pointer-events-none">
+      <div className="fixed bottom-4 right-4 z-70 flex flex-col items-end gap-2 pointer-events-none">
         <AnimatePresence>
           {toasts.map((t) => {
             const Icon = ICONS[t.type] || Heart;

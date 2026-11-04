@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { CalendarHeart, Gem, Heart, House, Plane, Plus, Sparkles, Star, Trash, X } from "lucide-react";
 import ConfirmDelete from "@/components/ConfirmDelete";
 import { Page } from "@/components/Motion";
+import VoiceButton, { appendVoice } from "@/components/VoiceButton";
 import { supabase } from "@/lib/supabase";
 import { runQuery, useTable } from "@/lib/db";
 import { usePeople } from "@/lib/people";
@@ -63,7 +64,7 @@ export default function FuturePage() {
       </div>
 
       <div className="mt-8 relative">
-        <div className="absolute left-5 top-0 bottom-0 w-0.5 bg-gradient-to-b from-rose to-rose-deep/30" />
+        <div className="absolute left-5 top-0 bottom-0 w-0.5 bg-linear-to-b from-rose to-rose-deep/30" />
         <div className="space-y-4">
           <AnimatePresence initial={false}>
             {upcoming.map((m) => {
@@ -187,7 +188,7 @@ function MilestoneForm({ onClose, refresh }) {
 
   return (
     <motion.div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--overlay)] p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-(--overlay) p-4"
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
       onClick={onClose}
     >
@@ -204,13 +205,16 @@ function MilestoneForm({ onClose, refresh }) {
           </button>
         </div>
 
-        <input
-          autoFocus
-          className="input-love mt-4"
-          placeholder="Our dream (e.g. See the northern lights)"
-          value={form.title}
-          onChange={(e) => setForm({ ...form, title: e.target.value })}
-        />
+        <div className="mt-4 flex gap-2">
+          <input
+            autoFocus
+            className="input-love"
+            placeholder="Our dream (e.g. See the northern lights)"
+            value={form.title}
+            onChange={(e) => setForm({ ...form, title: e.target.value })}
+          />
+          <VoiceButton onResult={(t) => setForm((f) => ({ ...f, title: appendVoice(f.title, t) }))} />
+        </div>
         <textarea
           className="input-love mt-3 h-20 resize-none"
           placeholder="A little more detail… (optional)"

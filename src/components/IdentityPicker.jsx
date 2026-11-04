@@ -3,11 +3,20 @@
 import { useState } from "react";
 import { Heart } from "lucide-react";
 import { usePeople } from "@/lib/people";
+import { useToast } from "@/lib/toast";
 
 export default function IdentityPicker() {
   const { me, people, pickSlot, loading } = usePeople();
   const [name, setName] = useState("");
   const [slot, setSlot] = useState(null);
+  const toast = useToast();
+
+  const confirm = async () => {
+    const saved = await pickSlot(slot, name.trim());
+    if (saved === false) {
+      toast("This browser won't remember you (private mode?) — you'd be asked again next visit", "info");
+    }
+  };
 
   if (me || loading) return null;
 
@@ -56,7 +65,7 @@ export default function IdentityPicker() {
         <button
           className="btn-love w-full justify-center mt-6"
           disabled={!slot || !name.trim()}
-          onClick={() => pickSlot(slot, name.trim())}
+          onClick={confirm}
         >
           <Heart size={16} /> This is me
         </button>

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { HeartHandshake } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import VoiceButton, { appendVoice } from "./VoiceButton";
 import { runQuery, useTable } from "@/lib/db";
 import { usePeople } from "@/lib/people";
 import { otherSlot } from "@/lib/identity";
@@ -64,13 +65,16 @@ export default function MoodCard() {
               </motion.button>
             ))}
           </div>
-          <input
-            className="input-love mt-3 text-sm"
-            placeholder="Add a note… (e.g. rough day at work)"
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-            disabled={!me}
-          />
+          <div className="mt-3 flex gap-2">
+            <input
+              className="input-love text-sm"
+              placeholder="Add a note… (e.g. rough day at work)"
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              disabled={!me}
+            />
+            <VoiceButton onResult={(t) => setNote((v) => appendVoice(v, t))} />
+          </div>
           {myMood && (
             <p className="mt-2 text-xs text-rose-deep">
               You&apos;re feeling {moodByKey(myMood.mood)?.label} {moodByKey(myMood.mood)?.emoji}
@@ -80,7 +84,7 @@ export default function MoodCard() {
         </div>
 
         {/* Partner's mood */}
-        <div className="rounded-2xl border border-line p-4 flex flex-col items-center justify-center text-center bg-gradient-to-b from-blush/60 to-card">
+        <div className="rounded-2xl border border-line p-4 flex flex-col items-center justify-center text-center bg-linear-to-b from-blush/60 to-card">
           {partnerMoodInfo ? (
             <>
               <motion.div

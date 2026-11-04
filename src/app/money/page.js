@@ -6,6 +6,7 @@ import { Heart, Plus, Target, Trash, TrendingDown, TrendingUp, X, PiggyBank } fr
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import ConfirmDelete from "@/components/ConfirmDelete";
 import { Page } from "@/components/Motion";
+import VoiceButton, { appendVoice } from "@/components/VoiceButton";
 import { supabase } from "@/lib/supabase";
 import { runQuery, useTable } from "@/lib/db";
 import { usePeople } from "@/lib/people";
@@ -191,11 +192,12 @@ function ItemList({ title, items, type, month, editable, refresh }) {
         <form onSubmit={add} className="mt-3 space-y-2">
           <div className="flex gap-2">
             <input
-              className="input-love text-xs flex-[2]"
+              className="input-love text-xs flex-2"
               placeholder="Note"
               value={label}
               onChange={(e) => setLabel(e.target.value)}
             />
+            <VoiceButton onResult={(t) => setLabel((v) => appendVoice(v, t))} className="w-8 h-8" />
             <input
               type="number" step="0.01" min="0"
               className="input-love text-xs flex-1"
@@ -288,7 +290,7 @@ function SavingsGoals({ goals, editable, refresh }) {
               </div>
               <div className="mt-3 h-3 rounded-full bg-blush overflow-hidden">
                 <motion.div
-                  className="h-full rounded-full bg-gradient-to-r from-rose to-rose-deep"
+                  className="h-full rounded-full bg-linear-to-r from-rose to-rose-deep"
                   initial={{ width: 0 }}
                   animate={{ width: `${pct}%` }}
                 />
@@ -354,7 +356,7 @@ function GoalForm({ onClose, refresh }) {
 
   return (
     <motion.div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--overlay)] p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-(--overlay) p-4"
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
       onClick={onClose}
     >
@@ -458,7 +460,7 @@ function Calculator() {
             onClick={() => press(k)}
             className={`py-3 rounded-xl font-bold transition-all ${
               k === "="
-                ? "bg-gradient-to-r from-rose to-rose-deep text-on-accent col-span-2"
+                ? "bg-linear-to-r from-rose to-rose-deep text-on-accent col-span-2"
                 : /[+\-*/%]/.test(k)
                 ? "bg-blush text-rose-deep"
                 : "bg-card border border-line hover:bg-blush/60"

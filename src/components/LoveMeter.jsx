@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
-import { Heart, HeartHandshake, Plus } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import { Heart, HeartHandshake, Plus, X } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { runQuery, useTable } from "@/lib/db";
 import { usePeople } from "@/lib/people";
-import { heartConfetti } from "@/lib/confetti";
+import { fireworks, heartConfetti } from "@/lib/confetti";
 import { timeAgo } from "@/lib/moods";
 import { useToast } from "@/lib/toast";
 
@@ -17,11 +17,19 @@ const MILESTONES = [
   { at: 100, label: "Forever", emoji: "💍" },
 ];
 
+const VOWS = [
+  "Do you take this heart to be yours — to love in distance and in closeness, in good WiFi and in bad, till forever?",
+  "Do you promise to choose them every day, in every small way, across every mile between you?",
+  "Will you hold this love through time zones and long nights, and never let it run dry?",
+  "Do you vow to keep pouring love into this jar — today, tomorrow, and every ordinary beautiful day?",
+];
+
 export default function LoveMeter() {
   const { me, mePerson, partner } = usePeople();
-  const { rows: meterRows } = useTable("love_meter");
+  const { rows: meterRows } = useTable("love_meter", { order: "id" });
   const { rows: log } = useTable("love_log");
   const [busy, setBusy] = useState(false);
+  const [vow, setVow] = useState(null); // { amount, quote } — pending ceremony
   const toast = useToast();
 
   const meter = meterRows[0];
@@ -59,8 +67,19 @@ export default function LoveMeter() {
     setBusy(false);
   };
 
+  const beginVow = (amount) =>
+    setVow({ amount, quote: VOWS[Math.floor(Math.random() * VOWS.length)] });
+
+  const sayYes = async () => {
+    if (!vow || busy) return;
+    const { amount } = vow;
+    setVow(null);
+    await addLove(amount);
+    fireworks();
+  };
+
   return (
-    <div className="card mt-8 p-6 overflow-hidden">
+    <div className="card mt-8 p-6">
       <div className="flex items-center justify-between gap-3">
         <h2 className="font-bold text-wine text-lg flex items-center gap-2">
           <HeartHandshake size={20} className="text-rose-deep" /> Our Love
@@ -72,7 +91,7 @@ export default function LoveMeter() {
       </p>
 
       {/* the bar */}
-      <div className="relative mt-6 mb-8">
+      <div className="relative mt-6 mb-14 mx-4">
         <div className="h-5 rounded-full bg-soft border border-line overflow-visible relative">
           <motion.div
             className="relative h-full rounded-full"
@@ -107,7 +126,11 @@ export default function LoveMeter() {
         {MILESTONES.map((m) => {
           const reached = value >= m.at;
           return (
-            <div key={m.at} className="absolute" style={{ left: `${m.at}%` }}>
+            <div
+              key={m.at}
+              className="absolute top-full flex flex-col items-center"
+              style={{ left: `${m.at}%` }}
+            >
               <div
                 className={`w-2.5 h-2.5 rounded-full border-2 -translate-x-1/2 mt-2 transition-colors ${
                   reached ? "bg-rose-deep border-rose-deep" : "bg-card border-line"
@@ -134,11 +157,11 @@ export default function LoveMeter() {
           </span>
         ) : (
           <>
-            <button className="btn-love text-sm" onClick={() => addLove(1)} disabled={!me || busy}>
+            <button className="btn-love text-sm" onClick={() => beginVow(1)} disabled={!me || busy}>
               <Heart size={14} className="fill-current" /> Pour +1%
             </button>
-            <button className="btn-ghost text-sm" onClick={() => addLove(5)} disabled={!me || busy}>
-              <Plus size={14} /> +5%
+            <button className="btn-ghost text-sm" onClick={() => beginVow(2)} disabled={!me || busy}>
+              <Plus size={14} /> +2%
             </button>
           </>
         )}
@@ -164,6 +187,61 @@ export default function LoveMeter() {
           ))}
         </div>
       )}
+
+      {/* vow ceremony */}
+      <AnimatePresence>
+        {vow && (
+          <motion.div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-(--overlay) p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setVow(null)}
+          >
+            <motion.div
+              onClick={(e) => e.stopPropagation()}
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              transition={{ type: "spring", stiffness: 260, damping: 22 }}
+              className="card w-full max-w-sm p-8 text-center"
+            >
+              <button
+                onClick={() => setVow(null)}
+                className="absolute top-4 right-4 text-rose-deep/60 hover:text-rose-deep"
+              >
+                <X size={18} />
+              </button>
+              <motion.div
+                animate={{ rotate: [0, -8, 8, 0] }}
+                transition={{ duration: 1.6, repeat: Infinity }}
+                className="text-5xl"
+              >
+                💍
+              </motion.div>
+              <h3 className="mt-3 font-romantic text-4xl text-wine">The Vow</h3>
+              <p className="mt-1 text-[11px] font-bold uppercase tracking-widest text-rose-deep/70">
+                Dearly beloved, we are gathered here
+              </p>
+              <p className="mt-4 text-sm leading-relaxed italic opacity-80">
+                “{vow.quote}”
+              </p>
+              <div className="mt-6 flex gap-2">
+                <button className="btn-ghost flex-1 justify-center" onClick={() => setVow(null)}>
+                  Not yet
+                </button>
+                <button
+                  className="btn-love flex-1 justify-center"
+                  onClick={sayYes}
+                  disabled={busy}
+                >
+                  <Heart size={14} className="fill-current" /> I do — pour +{vow.amount}%
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

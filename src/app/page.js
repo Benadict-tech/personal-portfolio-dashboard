@@ -12,6 +12,7 @@ import { otherSlot } from "@/lib/identity";
 import { letterUnlocked } from "@/lib/letters";
 import { todayStr } from "@/lib/dates";
 import { isSupabaseConfigured } from "@/lib/supabase";
+import { useHydrated } from "@/lib/useHydrated";
 
 export default function Home() {
   const { me, mePerson, partner } = usePeople();
@@ -34,9 +35,11 @@ export default function Home() {
     (l) => l.written_by === otherSlot(slot) && !l.opened && letterUnlocked(l, myMood)
   );
 
+  const hydrated = useHydrated();
   const hour = new Date().getHours();
-  const greeting =
-    hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+  const greeting = !hydrated
+    ? "Hello"
+    : hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
 
   return (
     <Page className="pt-8">
@@ -45,11 +48,12 @@ export default function Home() {
           {greeting}, {me?.name || "love"}
         </h1>
         <p className="mt-1 text-sm opacity-70">
-          {new Date().toLocaleDateString(undefined, {
-            weekday: "long",
-            month: "long",
-            day: "numeric",
-          })}
+          {hydrated &&
+            new Date().toLocaleDateString(undefined, {
+              weekday: "long",
+              month: "long",
+              day: "numeric",
+            })}
           {partner ? ` · thinking of ${partner.name} ${partner.emoji}` : ""}
         </p>
         <div className="mt-5">
