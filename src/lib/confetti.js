@@ -1,4 +1,5 @@
 import confetti from "canvas-confetti";
+import { emojiBlast } from "emoji-blast";
 
 const HEART_COLORS = ["#fb6f92", "#e0345f", "#a4133c", "#ffd3e0"];
 const FIREWORK_COLORS = ["#fb6f92", "#e0345f", "#ffd166", "#c8b6ff", "#ffd3e0"];
@@ -13,6 +14,11 @@ export function heartConfetti() {
     colors: HEART_COLORS,
     scalar: 2,
   });
+}
+
+// emoji fireworks — a burst of love emojis across the screen
+export function loveBlast() {
+  emojiBlast({ emojis: ["💗", "💋", "😘", "🥰", "💘", "💖"] });
 }
 
 // Celebration bursts from both sides, like firecrackers

@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 import { Brush, Eraser, Send, Shuffle } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { runQuery } from "@/lib/db";
-import { heartConfetti } from "@/lib/confetti";
+import { heartConfetti, loveBlast } from "@/lib/confetti";
 import { otherSlot } from "@/lib/identity";
 import { DRAW_WORDS, pickRandom } from "@/lib/games";
 
@@ -61,6 +61,11 @@ export default function DrawGuess({ game, me, partner, nameOf, refresh, toast })
 
   const start = async () => {
     if (!supabase || !me) return;
+    // retire any stale draw games still marked playing — they'd fight this one
+    await runQuery(
+      supabase.from("games").update({ status: "done" }).eq("type", "draw").eq("status", "playing"),
+      toast
+    );
     await runQuery(
       supabase.from("games").insert({
         type: "draw",
@@ -93,7 +98,7 @@ export default function DrawGuess({ game, me, partner, nameOf, refresh, toast })
     if (ok) {
       setGuessText("");
       if (correct) {
-        heartConfetti();
+        heartConfetti(); loveBlast();
         toast(`It was “${word}” — you got it! 🎉`);
       } else {
         toast("Nope — look closer 👀");
@@ -178,15 +183,16 @@ export default function DrawGuess({ game, me, partner, nameOf, refresh, toast })
                 withTimestamp={false}
               />
             ) : (
-              <ReactSketchCanvas
-                ref={canvasRef}
-                style={canvasStyle}
-                strokeWidth={4}
-                strokeColor="#b93a5c"
-                canvasColor="#fffdfb"
-                allowOnlyPointerType="none"
-                withTimestamp={false}
-              />
+              <div className="pointer-events-none">
+                <ReactSketchCanvas
+                  ref={canvasRef}
+                  style={canvasStyle}
+                  strokeWidth={4}
+                  strokeColor="#b93a5c"
+                  canvasColor="#fffdfb"
+                  withTimestamp={false}
+                />
+              </div>
             )}
           </div>
 

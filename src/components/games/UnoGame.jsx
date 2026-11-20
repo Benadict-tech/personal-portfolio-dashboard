@@ -8,7 +8,7 @@ import {
 import { RotateCcw, Swords } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { runQuery } from "@/lib/db";
-import { heartConfetti } from "@/lib/confetti";
+import { heartConfetti, loveBlast } from "@/lib/confetti";
 import { otherSlot } from "@/lib/identity";
 import {
   applyMove, cardLabel, colorOf, drawPass, faceOf, isWild,
@@ -117,7 +117,7 @@ export default function UnoGame({ game, me, partner, nameOf, refresh, toast }) {
     const next = applyMove(b, mySlot, card);
     if (await persist(next)) {
       if (next.winner === mySlot) {
-        heartConfetti();
+        heartConfetti(); loveBlast();
         toast("UNO! You emptied your hand 🏆");
       } else if (next.hands[mySlot].length === 1) {
         toast("UNO! One card left ❤️‍🔥");
@@ -131,7 +131,7 @@ export default function UnoGame({ game, me, partner, nameOf, refresh, toast }) {
     if (!card || !supabase) return;
     const next = applyMove(b, mySlot, card, color);
     if (await persist(next) && next.winner === mySlot) {
-      heartConfetti();
+      heartConfetti(); loveBlast();
       toast("UNO! You emptied your hand 🏆");
     }
   };

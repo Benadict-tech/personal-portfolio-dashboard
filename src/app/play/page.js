@@ -15,7 +15,6 @@ import TwoTruthsWish from "@/components/games/TwoTruthsWish";
 import StoryOfUs from "@/components/games/StoryOfUs";
 import TruthOrDare from "@/components/games/TruthOrDare";
 import UnoGame from "@/components/games/UnoGame";
-import SpinWheel from "@/components/games/SpinWheel";
 import ScratchCoupon from "@/components/games/ScratchCoupon";
 import DrawGuess from "@/components/games/DrawGuess";
 import BusinessHearts from "@/components/games/BusinessHearts";
@@ -25,7 +24,12 @@ export default function PlayPage() {
   const { rows: games, refresh } = useTable("games", { order: "updated_at" });
   const toast = useToast();
 
-  const find = (type, status) => games.find((g) => g.type === type && g.status === status);
+  // pick the newest matching row — stale "playing" rows from older sessions
+  // would otherwise fight the live one and flip turns on every update
+  const find = (type, status) =>
+    games
+      .filter((g) => g.type === type && g.status === status)
+      .sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at))[0];
   const ttt = find("ttt", "playing");
   const tttOpen = find("ttt", "open");
   const wyr = find("wyr", "playing");
@@ -33,7 +37,6 @@ export default function PlayPage() {
   const wish = find("wish", "playing");
   const story = find("story", "playing");
   const uno = find("uno", "playing");
-  const wheel = find("wheel", "playing");
   const scratch = find("scratch", "playing");
   const draw = find("draw", "playing");
   const business = find("business", "playing");
@@ -61,7 +64,6 @@ export default function PlayPage() {
           mePerson={mePerson}
           {...shared}
         />
-        <SpinWheel game={wheel} {...shared} />
         <ScratchCoupon game={scratch} {...shared} />
         <WouldYouRather game={wyr} {...shared} />
         <TwoTruthsWish game={wish} {...shared} />

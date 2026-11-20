@@ -13,6 +13,7 @@ import AuthGate from "@/components/AuthGate";
 import SupabaseBanner from "@/components/SupabaseBanner";
 import FloatingHearts from "@/components/FloatingHearts";
 import PhotoSurprise from "@/components/PhotoSurprise";
+import Pets from "@/components/Pets";
 import { ToastProvider } from "@/lib/toast";
 
 const quicksand = Quicksand({ variable: "--font-quicksand", subsets: ["latin"] });
@@ -42,6 +43,7 @@ export default function RootLayout({ children }) {
           <SupabaseBanner />
           <main className="mx-auto max-w-6xl px-4 pb-20 relative">{children}</main>
           <PhotoSurprise />
+          <Pets />
           <AuthGate />
         </ToastProvider>
       </body>

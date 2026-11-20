@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 import { Gift, Shuffle } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { runQuery } from "@/lib/db";
-import { heartConfetti } from "@/lib/confetti";
+import { heartConfetti, loveBlast } from "@/lib/confetti";
 import { otherSlot } from "@/lib/identity";
 import { SCRATCH_PRIZES, pickRandom } from "@/lib/games";
 
@@ -43,7 +43,7 @@ export default function ScratchCoupon({ game, me, partner, nameOf, refresh, toas
       toast
     );
     if (ok) {
-      heartConfetti();
+      heartConfetti(); loveBlast();
       refresh();
     }
   };

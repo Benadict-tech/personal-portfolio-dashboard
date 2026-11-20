@@ -1,17 +1,20 @@
 "use client";
 
+import { useEffect, useRef } from "react";
+import dynamic from "next/dynamic";
 import { AnimatePresence, motion } from "framer-motion";
 import { Building2, Dices, RotateCcw, SkipForward } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { runQuery } from "@/lib/db";
-import { heartConfetti } from "@/lib/confetti";
+import { heartConfetti, loveBlast } from "@/lib/confetti";
 import Avatar from "@/components/Avatar";
 import { otherSlot } from "@/lib/identity";
 import {
   TILES, SET_COLORS, GO_BONUS, rentOf, newBusinessBoard, rollMove, decideBuy,
 } from "@/lib/business";
 
-const DICE = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"];
+const Dice = dynamic(() => import("react-dice-roll"), { ssr: false });
+
 const MARKS = { a: "💗", b: "💙" };
 
 const TILE_ICON = { go: "🚩", chance: "❓", tax: "💸", bonus: "🎉", timeout: "⏸️" };
@@ -32,6 +35,21 @@ export default function BusinessHearts({ game, me, partner, nameOf, refresh, toa
   const mySlot = me?.slot;
   const myTurn = game && boardOk && b.turn === mySlot && !b.winner;
   const pending = b.pending;
+
+  // 3D dice — spin on every new roll, on both screens (keyed by board.rollSeq)
+  const d1Ref = useRef(null);
+  const d2Ref = useRef(null);
+  const lastSeq = useRef(b.rollSeq || 0);
+  useEffect(() => {
+    const seq = b.rollSeq || 0;
+    if (seq === lastSeq.current || !b.dice) {
+      lastSeq.current = seq;
+      return;
+    }
+    lastSeq.current = seq;
+    d1Ref.current?.rollDice(b.dice[0]);
+    d2Ref.current?.rollDice(b.dice[1]);
+  }, [b.dice, b.rollSeq]);
 
   const persist = async (board, msg) => {
     const done = Boolean(board.winner);
@@ -71,9 +89,10 @@ export default function BusinessHearts({ game, me, partner, nameOf, refresh, toa
   const roll = async () => {
     if (!supabase || !myTurn || !boardOk) return;
     const next = rollMove(b, mySlot);
+    next.rollSeq = (b.rollSeq || 0) + 1; // tells both screens to spin the dice
     const ok = await persist(next);
     if (ok && next.winner === mySlot) {
-      heartConfetti();
+      heartConfetti(); loveBlast();
       toast("They're broke — you win the board! 🏆");
     }
   };
@@ -82,7 +101,7 @@ export default function BusinessHearts({ game, me, partner, nameOf, refresh, toa
     if (!supabase || !myTurn || !pending) return;
     const next = decideBuy(b, mySlot, buy);
     if (await persist(next) && next.winner === mySlot) {
-      heartConfetti();
+      heartConfetti(); loveBlast();
       toast("They're broke — you win the board! 🏆");
     }
   };
@@ -180,11 +199,24 @@ export default function BusinessHearts({ game, me, partner, nameOf, refresh, toa
                     {myTurn ? "Your turn" : `${nameOf(b.turn)}'s turn…`}
                   </div>
 
-                  {b.dice && (
-                    <div className="mt-2 text-4xl tracking-widest">
-                      {DICE[b.dice[0] - 1]}{DICE[b.dice[1] - 1]}
-                    </div>
-                  )}
+                  <div className="mt-2 flex justify-center gap-3">
+                    <Dice
+                      ref={d1Ref}
+                      size={54}
+                      defaultValue={b.dice?.[0] || 6}
+                      rollingTime={900}
+                      triggers={[]}
+                      disabled={!myTurn || Boolean(b.winner)}
+                    />
+                    <Dice
+                      ref={d2Ref}
+                      size={54}
+                      defaultValue={b.dice?.[1] || 6}
+                      rollingTime={900}
+                      triggers={[]}
+                      disabled={!myTurn || Boolean(b.winner)}
+                    />
+                  </div>
 
                   {myTurn && !pending && (
                     <button className="btn-love text-sm mt-2" onClick={roll}>

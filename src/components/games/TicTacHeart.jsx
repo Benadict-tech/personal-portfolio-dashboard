@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { Gamepad2, Heart, RotateCcw, Swords } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { runQuery } from "@/lib/db";
-import { heartConfetti } from "@/lib/confetti";
+import { heartConfetti, loveBlast } from "@/lib/confetti";
 import Avatar from "@/components/Avatar";
 
 const EMPTY = [null, null, null, null, null, null, null, null, null];
@@ -77,7 +77,7 @@ export default function TicTacHeart({ game, openGame, doneGames, me, mePerson, p
     if (ok) {
       refresh();
       if (win === myMark) {
-        heartConfetti();
+        heartConfetti(); loveBlast();
         toast("You win! 🏆");
       }
     }
