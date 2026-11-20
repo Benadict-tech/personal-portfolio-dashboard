@@ -19,8 +19,10 @@ export default function TaskColumn({ title, emoji, tasks, editable, defaultOwner
   const toast = useToast();
 
   // "mine" = my column or the shared one — those accept tasks directly.
-  // The partner's column only accepts requests.
+  // Adding to the partner's column also lands directly — only the label differs:
+  // Deepika (b) → Ben (a) = an order 👑 · Ben (a) → Deepika (b) = a request 💌
   const isMine = defaultOwner === meSlot || defaultOwner === "shared";
+  const isOrder = !isMine && meSlot === "b" && defaultOwner === "a";
   const requests = tasks.filter((t) => t.status === "pending");
   const active = tasks.filter((t) => t.status !== "pending");
   const pending = active.filter((t) => !t.done);
@@ -34,11 +36,13 @@ export default function TaskColumn({ title, emoji, tasks, editable, defaultOwner
         title: title_.trim(),
         date: todayStr(),
         owner: defaultOwner,
-        status: isMine ? "active" : "pending",
+        status: "active",
         requested_by: isMine ? null : meSlot,
       }),
       toast,
-      isMine ? "Added to the list" : `Sent to ${partnerName || "your partner"} as a request 💌`
+      isMine ? "Added to the list"
+        : isOrder ? `Ordered onto ${partnerName || "Ben"}'s list 👑`
+        : `Requested on ${partnerName || "your partner"}'s list 💌`
     );
     if (ok) setTitle("");
   };
@@ -190,7 +194,15 @@ export default function TaskColumn({ title, emoji, tasks, editable, defaultOwner
                   onBlur={() => saveEdit(t)}
                 />
               ) : (
-                <span className={`flex-1 text-sm ${t.done ? "line-through" : ""}`}>{t.title}</span>
+                <span className={`flex-1 text-sm ${t.done ? "line-through" : ""}`}>
+                  {t.title}
+                  {t.requested_by && (
+                    <span className="ml-1.5 px-1.5 py-0.5 rounded-full bg-gold/50 text-[9px] font-bold uppercase tracking-wide text-wine align-middle">
+                      {t.requested_by === "b" ? "👑 ordered" : "💌 requested"} by{" "}
+                      {t.requested_by === meSlot ? "you" : partnerName || "partner"}
+                    </span>
+                  )}
+                </span>
               )}
               {editable && editingId !== t.id && (
                 <button
@@ -221,7 +233,11 @@ export default function TaskColumn({ title, emoji, tasks, editable, defaultOwner
         <form onSubmit={addTask} className="mt-3 flex gap-2">
           <input
             className="input-love text-sm"
-            placeholder={isMine ? "Add a task…" : `Suggest a task for ${partnerName || "them"}…`}
+            placeholder={
+              isMine ? "Add a task…"
+                : isOrder ? `Give ${partnerName || "Ben"} a task…`
+                : `Request a task for ${partnerName || "them"}…`
+            }
             value={title_}
             onChange={(e) => setTitle(e.target.value)}
           />
@@ -229,8 +245,8 @@ export default function TaskColumn({ title, emoji, tasks, editable, defaultOwner
           <button
             className="btn-love px-3"
             type="submit"
-            aria-label={isMine ? "Add task" : "Send request"}
-            title={isMine ? "Add task" : "Send as a request"}
+            aria-label={isMine ? "Add task" : isOrder ? "Give task" : "Send request"}
+            title={isMine ? "Add task" : isOrder ? "Add straight to their list" : "Send as a request"}
           >
             {isMine ? <Plus size={16} /> : <Send size={15} />}
           </button>

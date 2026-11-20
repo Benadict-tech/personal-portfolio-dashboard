@@ -4,8 +4,8 @@ import Image from "next/image";
 import { avatarOf } from "@/lib/photos";
 
 // circular face avatar for a heart slot — falls back to the person's emoji
-export default function Avatar({ slot, emoji, size = 28, className = "" }) {
-  const src = avatarOf(slot);
+export default function Avatar({ slot, img, emoji, size = 28, className = "" }) {
+  const src = img || avatarOf(slot);
   if (!src) return <span className={className}>{emoji}</span>;
   return (
     <Image

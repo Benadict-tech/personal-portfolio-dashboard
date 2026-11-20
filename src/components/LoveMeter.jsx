@@ -24,6 +24,7 @@ export default function LoveMeter() {
   const { me, mePerson, partner } = usePeople();
   const { rows: kisses } = useTable("love_log");
   const [busy, setBusy] = useState(false);
+  const [pecked, setPecked] = useState(false);
   const toast = useToast();
 
   const today = todayStr();
@@ -91,6 +92,8 @@ export default function LoveMeter() {
     );
     setBusy(false);
     if (!ok) return;
+    setPecked(true);
+    setTimeout(() => setPecked(false), 750);
     heartConfetti();
     if (completesToday) {
       const newStreak = streak + 1;
@@ -147,18 +150,44 @@ export default function LoveMeter() {
       {/* the kiss button */}
       <div className="mt-5 flex flex-col items-center">
         <motion.button
-          whileHover={{ scale: 1.06 }}
-          whileTap={{ scale: 0.88 }}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.92 }}
           onClick={sendKiss}
           disabled={!me || busy}
           aria-label="Send a kiss"
-          className="w-20 h-20 rounded-full text-4xl flex items-center justify-center text-on-accent shadow-lg disabled:opacity-50"
-          style={{
-            background: "linear-gradient(135deg, var(--accent), var(--accent-2))",
-            boxShadow: "0 6px 22px color-mix(in srgb, var(--accent) 45%, transparent)",
-          }}
+          className="relative w-36 h-24 flex items-center justify-center disabled:opacity-50"
         >
-          �
+          {/* soft blush backdrop */}
+          <div
+            className="absolute inset-x-2 inset-y-1 rounded-full shadow-lg"
+            style={{
+              background: "linear-gradient(135deg, var(--accent), var(--accent-2))",
+              opacity: 0.22,
+            }}
+          />
+          {/* your faces leaning in */}
+          <motion.div
+            animate={{ x: pecked ? 12 : 0, rotate: pecked ? -2 : -8 }}
+            transition={{ type: "spring", stiffness: 350, damping: 16 }}
+            className="absolute left-3 z-10"
+          >
+            <Avatar slot={me?.slot || "a"} size={54} className="ring-2 ring-white shadow-md" />
+          </motion.div>
+          <motion.div
+            animate={{ x: pecked ? -12 : 0, rotate: pecked ? 2 : 8 }}
+            transition={{ type: "spring", stiffness: 350, damping: 16 }}
+            className="absolute right-3 z-10"
+          >
+            <Avatar slot={partnerSlot} size={54} className="ring-2 ring-white shadow-md" />
+          </motion.div>
+          {/* the kiss where lips meet */}
+          <motion.span
+            animate={pecked ? { scale: [1, 1.7, 1], y: [0, -8, 0] } : { scale: 1 }}
+            transition={{ duration: 0.6 }}
+            className="relative z-20 text-2xl drop-shadow"
+          >
+            💋
+          </motion.span>
         </motion.button>
         <p className="mt-2 text-xs opacity-70">
           {me ? `Tap to send ${partnerName} a kiss` : "Pick your heart to send kisses"}

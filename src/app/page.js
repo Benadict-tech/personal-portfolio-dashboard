@@ -15,6 +15,9 @@ import { todayStr } from "@/lib/dates";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import { useHydrated } from "@/lib/useHydrated";
 import { PHOTO_US } from "@/lib/photos";
+import HangingPhoto from "@/components/HangingPhoto";
+import PhotoGarland from "@/components/PhotoGarland";
+import PhotoStand from "@/components/PhotoStand";
 
 export default function Home() {
   const { me, mePerson, partner } = usePeople();
@@ -45,7 +48,9 @@ export default function Home() {
 
   return (
     <Page className="pt-8">
-      <div className="text-center">
+      <div className="relative text-center">
+        <HangingPhoto img="/assets/us-3.jpeg" size={88} rotate={-7} className="absolute left-0 top-2 hidden lg:block" />
+        <HangingPhoto img="/assets/us-22.jpeg" size={88} rotate={6} className="absolute right-0 top-6 hidden lg:block" />
         <Image
           src={PHOTO_US}
           alt="us"
@@ -70,6 +75,11 @@ export default function Home() {
           <CountdownChip />
         </div>
       </div>
+
+      <PhotoGarland
+        className="mt-10"
+        photos={["/assets/us-2.jpeg", "/assets/us-6.jpeg", "/assets/us-9.jpeg", "/assets/us-13.jpeg", "/assets/us-18.jpeg"]}
+      />
 
       {!isSupabaseConfigured && <PreviewNote />}
 
@@ -145,6 +155,15 @@ export default function Home() {
           />
         </Fade>
       </div>
+
+      <PhotoGarland
+        className="mt-10"
+        photos={["/assets/us-5.jpeg", "/assets/us-11.jpeg", "/assets/us-16.jpeg", "/assets/us-21.jpeg"]}
+      />
+
+      <Fade delay={0.45}>
+        <PhotoStand />
+      </Fade>
     </Page>
   );
 }

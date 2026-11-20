@@ -12,6 +12,7 @@ import NavBar from "@/components/NavBar";
 import AuthGate from "@/components/AuthGate";
 import SupabaseBanner from "@/components/SupabaseBanner";
 import FloatingHearts from "@/components/FloatingHearts";
+import PhotoSurprise from "@/components/PhotoSurprise";
 import { ToastProvider } from "@/lib/toast";
 
 const quicksand = Quicksand({ variable: "--font-quicksand", subsets: ["latin"] });
@@ -40,6 +41,7 @@ export default function RootLayout({ children }) {
           <NavBar />
           <SupabaseBanner />
           <main className="mx-auto max-w-6xl px-4 pb-20 relative">{children}</main>
+          <PhotoSurprise />
           <AuthGate />
         </ToastProvider>
       </body>

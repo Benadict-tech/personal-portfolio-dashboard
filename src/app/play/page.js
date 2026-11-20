@@ -3,6 +3,7 @@
 import { Trophy } from "lucide-react";
 import { Page } from "@/components/Motion";
 import PageHero from "@/components/PageHero";
+import PhotoGarland from "@/components/PhotoGarland";
 import { PAGE_HEROES } from "@/lib/photos";
 import { useTable } from "@/lib/db";
 import { usePeople } from "@/lib/people";
@@ -46,6 +47,11 @@ export default function PlayPage() {
   return (
     <Page className="pt-8">
       <PageHero {...PAGE_HEROES.play} title="Play Together" />
+
+      <PhotoGarland
+        className="mt-2"
+        photos={["/assets/us-7.jpeg", "/assets/us-14.jpeg", "/assets/us-19.jpeg", "/assets/us-23.jpeg"]}
+      />
 
       <div className="mt-8 grid gap-6 lg:grid-cols-2 items-start">
         <TicTacHeart

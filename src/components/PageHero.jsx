@@ -1,17 +1,32 @@
 "use client";
 
-import Image from "next/image";
+import HangingPhoto from "@/components/HangingPhoto";
 
-// wallpaper banner for page tops — image + soft veil + romantic title
-export default function PageHero({ img, title, caption, pos = "50% 50%" }) {
+// page header — clean title flanked by little pinned photos + one dangling below
+export default function PageHero({ title, caption, pins = [] }) {
   return (
-    <div className="relative -mx-4 overflow-hidden rounded-3xl h-44 sm:h-52 flex items-end justify-center mb-8">
-      <Image src={img} alt="" fill sizes="100vw" priority className="object-cover" style={{ objectPosition: pos }} />
-      <div className="absolute inset-0 bg-linear-to-t from-background via-background/60 to-background/20" />
-      <div className="relative pb-5 text-center">
-        <h1 className="font-romantic text-5xl sm:text-6xl text-wine drop-shadow-sm">{title}</h1>
-        {caption && <p className="text-xs sm:text-sm opacity-70 mt-1">{caption}</p>}
+    <div className="relative mb-10 pt-3 text-center">
+      <div className="flex items-center justify-center gap-3 sm:gap-8">
+        {pins[0] && (
+          <HangingPhoto img={pins[0]} size={58} rotate={-8} className="hidden sm:block shrink-0" />
+        )}
+        <div>
+          <h1 className="font-romantic text-5xl sm:text-6xl text-wine drop-shadow-sm">{title}</h1>
+          {caption && <p className="text-xs sm:text-sm opacity-70 mt-1">{caption}</p>}
+        </div>
+        {pins[1] && (
+          <HangingPhoto img={pins[1]} size={58} rotate={7} className="hidden sm:block shrink-0" />
+        )}
       </div>
+      {pins[2] && (
+        <HangingPhoto
+          img={pins[2]}
+          size={50}
+          rotate={5}
+          string={10}
+          className="absolute -bottom-8 right-2 sm:right-14"
+        />
+      )}
     </div>
   );
 }

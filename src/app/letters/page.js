@@ -8,6 +8,7 @@ import {
 import ConfirmDelete from "@/components/ConfirmDelete";
 import { Page } from "@/components/Motion";
 import PageHero from "@/components/PageHero";
+import PhotoGarland from "@/components/PhotoGarland";
 import Avatar from "@/components/Avatar";
 import { PAGE_HEROES } from "@/lib/photos";
 import VoiceButton, { appendVoice } from "@/components/VoiceButton";
@@ -62,6 +63,11 @@ export default function LettersPage() {
   return (
     <Page className="pt-8">
       <PageHero {...PAGE_HEROES.letters} title="Love Letters" />
+
+      <PhotoGarland
+        className="mt-2"
+        photos={["/assets/us-3.jpeg", "/assets/us-8.jpeg", "/assets/us-15.jpeg", "/assets/us-20.jpeg"]}
+      />
 
       <div className="mt-6 text-center">
         <button className="btn-love" onClick={() => setShowForm(true)} disabled={!me}>
