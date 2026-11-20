@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Check, Heart, Clock, Plane, Play, Square, User, Users } from "lucide-react";
 import { Page } from "@/components/Motion";
+import PageHero from "@/components/PageHero";
+import { PAGE_HEROES } from "@/lib/photos";
 import { supabase } from "@/lib/supabase";
 import { runQuery, useTable } from "@/lib/db";
 import { usePeople } from "@/lib/people";
@@ -43,7 +45,7 @@ export default function TimerPage() {
 
   return (
     <Page className="pt-8">
-      <h1 className="font-romantic text-6xl text-wine text-center">Time & Hearts</h1>
+      <PageHero {...PAGE_HEROES.timer} title="Time & Hearts" />
       <div className="mt-8 grid gap-6 md:grid-cols-2 items-start">
         <CountdownCard
           visit={nextVisit}

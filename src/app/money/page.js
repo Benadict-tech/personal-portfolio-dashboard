@@ -6,6 +6,8 @@ import { Heart, Plus, Target, Trash, TrendingDown, TrendingUp, X, PiggyBank } fr
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import ConfirmDelete from "@/components/ConfirmDelete";
 import { Page } from "@/components/Motion";
+import PageHero from "@/components/PageHero";
+import { PAGE_HEROES } from "@/lib/photos";
 import VoiceButton, { appendVoice } from "@/components/VoiceButton";
 import { supabase } from "@/lib/supabase";
 import { runQuery, useTable } from "@/lib/db";
@@ -47,10 +49,7 @@ export default function MoneyPage() {
 
   return (
     <Page className="pt-8">
-      <h1 className="font-romantic text-6xl text-wine text-center">Love & Money</h1>
-      <p className="text-center text-sm opacity-70 mt-2">
-        Building our future, one saved rupee at a time.
-      </p>
+      <PageHero {...PAGE_HEROES.money} title="Love & Money" />
 
       {/* Budget */}
       <div className="card mt-8 p-5">

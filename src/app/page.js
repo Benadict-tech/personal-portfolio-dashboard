@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import CountdownChip from "@/components/CountdownChip";
 import LoveMeter from "@/components/LoveMeter";
@@ -13,6 +14,7 @@ import { letterUnlocked } from "@/lib/letters";
 import { todayStr } from "@/lib/dates";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import { useHydrated } from "@/lib/useHydrated";
+import { PHOTO_US } from "@/lib/photos";
 
 export default function Home() {
   const { me, mePerson, partner } = usePeople();
@@ -44,7 +46,15 @@ export default function Home() {
   return (
     <Page className="pt-8">
       <div className="text-center">
-        <h1 className="font-romantic text-6xl text-wine">
+        <Image
+          src={PHOTO_US}
+          alt="us"
+          width={112}
+          height={112}
+          priority
+          className="mx-auto rounded-full object-cover ring-4 ring-rose/40 shadow-lg"
+        />
+        <h1 className="font-romantic text-6xl text-wine mt-3">
           {greeting}, {me?.name || "love"}
         </h1>
         <p className="mt-1 text-sm opacity-70">
@@ -108,6 +118,8 @@ export default function Home() {
             tasks={mine}
             editable={Boolean(me)}
             defaultOwner={slot}
+            meSlot={me?.slot}
+            partnerName={partner?.name}
           />
         </Fade>
         <Fade delay={0.3}>
@@ -117,6 +129,8 @@ export default function Home() {
             tasks={ours}
             editable={Boolean(me)}
             defaultOwner="shared"
+            meSlot={me?.slot}
+            partnerName={partner?.name}
           />
         </Fade>
         <Fade delay={0.4}>
@@ -126,6 +140,8 @@ export default function Home() {
             tasks={theirs}
             editable={false}
             defaultOwner={otherSlot(slot)}
+            meSlot={me?.slot}
+            partnerName={partner?.name}
           />
         </Fade>
       </div>

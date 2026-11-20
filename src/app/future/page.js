@@ -5,6 +5,8 @@ import { AnimatePresence, motion } from "framer-motion";
 import { CalendarHeart, Gem, Heart, House, Plane, Plus, Sparkles, Star, Trash, X } from "lucide-react";
 import ConfirmDelete from "@/components/ConfirmDelete";
 import { Page } from "@/components/Motion";
+import PageHero from "@/components/PageHero";
+import { PAGE_HEROES } from "@/lib/photos";
 import VoiceButton, { appendVoice } from "@/components/VoiceButton";
 import { supabase } from "@/lib/supabase";
 import { runQuery, useTable } from "@/lib/db";
@@ -52,10 +54,7 @@ export default function FuturePage() {
 
   return (
     <Page className="pt-8">
-      <h1 className="font-romantic text-6xl text-wine text-center">Our Future</h1>
-      <p className="text-center text-sm opacity-70 mt-2">
-        Every dream we write down is a promise we&apos;re making.
-      </p>
+      <PageHero {...PAGE_HEROES.future} title="Our Future" />
 
       <div className="mt-6 text-center">
         <button className="btn-love" onClick={() => setShowForm(true)} disabled={!me}>

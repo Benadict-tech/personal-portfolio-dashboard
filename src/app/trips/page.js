@@ -7,6 +7,8 @@ import {
 } from "lucide-react";
 import ConfirmDelete from "@/components/ConfirmDelete";
 import { Page } from "@/components/Motion";
+import PageHero from "@/components/PageHero";
+import { PAGE_HEROES } from "@/lib/photos";
 import VoiceButton, { appendVoice } from "@/components/VoiceButton";
 import { supabase } from "@/lib/supabase";
 import { runQuery, useTable } from "@/lib/db";
@@ -70,10 +72,7 @@ export default function TripsPage() {
 
   return (
     <Page className="pt-8">
-      <h1 className="font-romantic text-6xl text-wine text-center">When We&apos;re Together</h1>
-      <p className="text-center text-sm opacity-70 mt-2">
-        Plan every hour of the days we&apos;ve been counting down to.
-      </p>
+      <PageHero {...PAGE_HEROES.trips} title="When We're Together" />
 
       {/* trip tabs */}
       <div className="mt-6 flex flex-wrap justify-center gap-2">

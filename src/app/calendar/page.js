@@ -17,6 +17,8 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, Heart, Plus, Trash, X } from "lucide-react";
 import ConfirmDelete from "@/components/ConfirmDelete";
 import { Page } from "@/components/Motion";
+import PageHero from "@/components/PageHero";
+import { PAGE_HEROES } from "@/lib/photos";
 import VoiceButton, { appendVoice } from "@/components/VoiceButton";
 import { supabase } from "@/lib/supabase";
 import { runQuery, useTable } from "@/lib/db";
@@ -64,7 +66,7 @@ export default function CalendarPage() {
 
   return (
     <Page className="pt-8">
-      <h1 className="font-romantic text-6xl text-wine text-center">Our Calendar</h1>
+      <PageHero {...PAGE_HEROES.calendar} title="Our Calendar" />
 
       {/* legend + filters */}
       <div className="mt-4 flex flex-wrap justify-center gap-2">

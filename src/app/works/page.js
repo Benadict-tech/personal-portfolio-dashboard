@@ -7,6 +7,8 @@ import {
 } from "lucide-react";
 import ConfirmDelete from "@/components/ConfirmDelete";
 import { Fade, Page } from "@/components/Motion";
+import PageHero from "@/components/PageHero";
+import { PAGE_HEROES } from "@/lib/photos";
 import VoiceButton, { appendVoice } from "@/components/VoiceButton";
 import { supabase } from "@/lib/supabase";
 import { runQuery, useTable } from "@/lib/db";
@@ -53,10 +55,7 @@ export default function WorksPage() {
 
   return (
     <Page className="pt-8">
-      <h1 className="font-romantic text-6xl text-wine text-center">Our Little Office</h1>
-      <p className="text-center text-sm opacity-70 mt-2">
-        Two desks, one team — pick a project and get to work side by side.
-      </p>
+      <PageHero {...PAGE_HEROES.works} title="Our Little Office" />
 
       {/* project tabs */}
       <div className="mt-6 flex flex-wrap justify-center gap-2">

@@ -6,6 +6,7 @@ import { Eye, EyeOff, Gem, Heart, Lock, LogIn, Mail, Sparkles } from "lucide-rea
 import { supabase } from "@/lib/supabase";
 import { usePeople } from "@/lib/people";
 import { useToast } from "@/lib/toast";
+import Avatar from "./Avatar";
 
 const QUOTES = [
   "Whatever our souls are made of, yours and mine are the same.",
@@ -166,7 +167,15 @@ export default function AuthGate() {
                         : "border-rose/50 bg-blush/60 text-wine hover:border-rose-deep hover:bg-blush"
                     }`}
                   >
-                    <Heart size={30} className={`mx-auto mb-1 ${slot === s ? "fill-rose-deep text-rose-deep" : "fill-rose/30 text-rose-deep"}`} />
+                    <div className="relative mx-auto mb-1 w-fit">
+                      <Avatar slot={s} size={52} className={slot === s ? "ring-rose-deep" : ""} />
+                      <Heart
+                        size={15}
+                        className={`absolute -bottom-1 -right-1 ${
+                          slot === s ? "fill-rose-deep text-rose-deep" : "fill-rose/40 text-rose"
+                        }`}
+                      />
+                    </div>
                     {s === "a" ? "Heart One" : "Heart Two"}
                     {takenBy(s) && (
                       <div className="text-xs font-normal opacity-60 mt-1">
@@ -281,12 +290,9 @@ export default function AuthGate() {
             </motion.button>
           </form>
 
-          <button
-            className="mt-4 text-xs text-rose-deep hover:underline"
-            onClick={() => { setMode(isSignup ? "signin" : "signup"); setShowPw(false); }}
-          >
-            {isSignup ? "Already wrote your story? Sign in" : "New here? Begin your story together"}
-          </button>
+          {/* sign-up hidden — this app is just for the two of us. Re-add this
+              button (and the signup branch in submitAuth) if a new account is
+              ever needed. */}
         </motion.div>
       </div>
     </>

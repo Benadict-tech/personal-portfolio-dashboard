@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { CalendarDays, Coins, Gamepad2, Heart, LampDesk, ListTodo, LogOut, Mail, Map, Sparkles, Timer } from "lucide-react";
 import { usePeople } from "@/lib/people";
 import ThemePicker from "./ThemePicker";
+import Avatar from "./Avatar";
 
 const links = [
   { href: "/", label: "Today", icon: ListTodo },
@@ -61,12 +62,12 @@ export default function NavBar() {
         <div className="flex items-center gap-2 shrink-0">
           {me && (
             <div className="hidden md:flex items-center gap-2 text-sm">
-              <span className="px-3 py-1 rounded-full bg-blush text-wine font-semibold">
-                {me.emoji} {me.name}
+              <span className="pl-1 pr-3 py-1 rounded-full bg-blush text-wine font-semibold flex items-center gap-2">
+                <Avatar slot={me.slot} emoji={me.emoji} size={22} /> {me.name}
               </span>
               <Heart size={13} className="fill-rose text-rose" />
-              <span className="px-3 py-1 rounded-full bg-blush text-wine font-semibold">
-                {partner ? `${partner.emoji} ${partner.name}` : "…"}
+              <span className="pl-1 pr-3 py-1 rounded-full bg-blush text-wine font-semibold flex items-center gap-2">
+                {partner ? <><Avatar slot={partner.slot} emoji={partner.emoji} size={22} /> {partner.name}</> : "…"}
               </span>
             </div>
           )}

@@ -34,6 +34,9 @@ const securityHeaders = [
 const nextConfig = {
   reactCompiler: true,
   poweredByHeader: false,
+  experimental: {
+    agentUpgrade: "security",
+  },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },

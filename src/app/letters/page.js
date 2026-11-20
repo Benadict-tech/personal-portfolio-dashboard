@@ -7,6 +7,9 @@ import {
 } from "lucide-react";
 import ConfirmDelete from "@/components/ConfirmDelete";
 import { Page } from "@/components/Motion";
+import PageHero from "@/components/PageHero";
+import Avatar from "@/components/Avatar";
+import { PAGE_HEROES } from "@/lib/photos";
 import VoiceButton, { appendVoice } from "@/components/VoiceButton";
 import { supabase } from "@/lib/supabase";
 import { runQuery, useTable } from "@/lib/db";
@@ -58,10 +61,7 @@ export default function LettersPage() {
 
   return (
     <Page className="pt-8">
-      <h1 className="font-romantic text-6xl text-wine text-center">Love Letters</h1>
-      <p className="text-center text-sm opacity-70 mt-2">
-        Sealed letters that open exactly when they&apos;re needed most.
-      </p>
+      <PageHero {...PAGE_HEROES.letters} title="Love Letters" />
 
       <div className="mt-6 text-center">
         <button className="btn-love" onClick={() => setShowForm(true)} disabled={!me}>
@@ -115,7 +115,10 @@ export default function LettersPage() {
                     </button>
                   ) : (
                     <div className="text-center">
-                      <div className="text-5xl opacity-60">✉️</div>
+                      <div className="relative w-fit mx-auto">
+                        <Avatar slot={l.written_by} size={52} className="opacity-80" />
+                        <span className="absolute -bottom-1 -right-1 text-xl">✉️</span>
+                      </div>
                       <h3 className="mt-3 font-bold text-wine">{l.title}</h3>
                       <div className="mt-3 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blush text-wine/60 text-sm font-semibold">
                         <Lock size={13} /> Sealed with a kiss
