@@ -24,9 +24,9 @@ import PhotoStand from "@/components/PhotoStand";
 export default function Home() {
   const { me, mePerson, partner } = usePeople();
   const toast = useToast();
-  // today + the last 2 days — unfinished tasks carry forward
-  const { rows: tasks } = useTable("tasks", {
-    filter: (q) => q.gte("date", shiftDayStr(-2)).lte("date", todayStr()),
+  // every unfinished task carries forward until done; finished ones hide after midnight
+  const { rows: tasks, refresh: refreshTasks } = useTable("tasks", {
+    filter: (q) => q.or(`done.eq.false,date.eq.${todayStr()}`),
   });
   const { rows: events } = useTable("events", {
     filter: (q) => q.eq("date", todayStr()),
@@ -164,6 +164,7 @@ export default function Home() {
             defaultOwner={slot}
             meSlot={me?.slot}
             partnerName={partner?.name}
+            refresh={refreshTasks}
           />
         </Fade>
         <Fade delay={0.3}>
@@ -175,6 +176,7 @@ export default function Home() {
             defaultOwner="shared"
             meSlot={me?.slot}
             partnerName={partner?.name}
+            refresh={refreshTasks}
           />
         </Fade>
         <Fade delay={0.4}>
@@ -186,6 +188,7 @@ export default function Home() {
             defaultOwner={otherSlot(slot)}
             meSlot={me?.slot}
             partnerName={partner?.name}
+            refresh={refreshTasks}
           />
         </Fade>
       </div>

@@ -12,7 +12,7 @@ import { useToast } from "@/lib/toast";
 import { heartConfetti } from "@/lib/confetti";
 import { fmtDate, fmtTime, isTaskOverdue, shiftDayStr, todayStr } from "@/lib/dates";
 
-export default function TaskColumn({ title, emoji, tasks, editable, defaultOwner, meSlot, partnerName }) {
+export default function TaskColumn({ title, emoji, tasks, editable, defaultOwner, meSlot, partnerName, refresh }) {
   const [title_, setTitle] = useState("");
   const [dueTime, setDueTime] = useState("");
   const [showDue, setShowDue] = useState(false);
@@ -51,32 +51,36 @@ export default function TaskColumn({ title, emoji, tasks, editable, defaultOwner
     if (ok) {
       setTitle("");
       setDueTime("");
+      refresh?.();
     }
   };
 
   const approve = async (task) => {
     if (!supabase) return;
-    await runQuery(
+    const ok = await runQuery(
       supabase.from("tasks").update({ status: "active" }).eq("id", task.id),
       toast,
       `Added “${task.title}” ✓`
     );
+    if (ok) refresh?.();
   };
 
   const decline = async (task) => {
     if (!supabase) return;
-    await runQuery(supabase.from("tasks").delete().eq("id", task.id), toast, "Request declined");
+    const ok = await runQuery(supabase.from("tasks").delete().eq("id", task.id), toast, "Request declined");
+    if (ok) refresh?.();
   };
 
   const saveEdit = async (task) => {
     const title = editText.trim();
     setEditingId(null);
     if (!title || title === task.title || !editable || !supabase) return;
-    await runQuery(
+    const ok = await runQuery(
       supabase.from("tasks").update({ title }).eq("id", task.id),
       toast,
       "Task updated"
     );
+    if (ok) refresh?.();
   };
 
   const toggle = async (task) => {
@@ -86,12 +90,15 @@ export default function TaskColumn({ title, emoji, tasks, editable, defaultOwner
       toast,
       !task.done ? "Task done! ✨" : null
     );
+    if (ok) refresh?.();
     if (ok && !task.done && defaultOwner === "shared") heartConfetti();
   };
 
   const remove = async (id) => {
     if (!editable || !supabase) return false;
-    return runQuery(supabase.from("tasks").delete().eq("id", id), toast);
+    const ok = await runQuery(supabase.from("tasks").delete().eq("id", id), toast);
+    if (ok) refresh?.();
+    return ok;
   };
 
   return (
@@ -150,7 +157,10 @@ export default function TaskColumn({ title, emoji, tasks, editable, defaultOwner
                       </>
                     ) : (
                       <button
-                        onClick={() => runQuery(supabase.from("tasks").delete().eq("id", t.id), toast, "Request withdrawn")}
+                        onClick={async () => {
+                          const ok = await runQuery(supabase.from("tasks").delete().eq("id", t.id), toast, "Request withdrawn");
+                          if (ok) refresh?.();
+                        }}
                         className="text-xs opacity-50 hover:opacity-100 transition-opacity"
                       >
                         withdraw
