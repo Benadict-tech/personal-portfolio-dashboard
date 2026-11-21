@@ -29,12 +29,14 @@ create table if not exists tasks (
   owner text not null default 'shared' check (owner in ('a', 'b', 'shared')),
   status text not null default 'active' check (status in ('active', 'pending')),
   requested_by text check (requested_by in ('a', 'b')),
+  due text check (due is null or due ~ '^[0-2][0-9]:[0-5][0-9]$'),
   created_at timestamptz not null default now()
 );
 
 -- for databases created before task requests existed
 alter table tasks add column if not exists status text not null default 'active' check (status in ('active', 'pending'));
 alter table tasks add column if not exists requested_by text check (requested_by in ('a', 'b'));
+alter table tasks add column if not exists due text check (due is null or due ~ '^[0-2][0-9]:[0-5][0-9]$');
 
 create table if not exists events (
   id bigint generated always as identity primary key,

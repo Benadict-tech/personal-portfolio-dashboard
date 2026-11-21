@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Check, Heart, Pencil, Plus, Send, X } from "lucide-react";
+import { Check, Clock, Heart, Pencil, Plus, Send, X } from "lucide-react";
 import Avatar from "./Avatar";
 import ConfirmDelete from "./ConfirmDelete";
 import VoiceButton, { appendVoice } from "./VoiceButton";
@@ -10,13 +10,16 @@ import { runQuery } from "@/lib/db";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/lib/toast";
 import { heartConfetti } from "@/lib/confetti";
-import { todayStr } from "@/lib/dates";
+import { fmtDate, fmtTime, isTaskOverdue, shiftDayStr, todayStr } from "@/lib/dates";
 
 export default function TaskColumn({ title, emoji, tasks, editable, defaultOwner, meSlot, partnerName }) {
   const [title_, setTitle] = useState("");
+  const [dueTime, setDueTime] = useState("");
+  const [showDue, setShowDue] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [editText, setEditText] = useState("");
   const toast = useToast();
+  const today = todayStr();
 
   // "mine" = my column or the shared one — those accept tasks directly.
   // Adding to the partner's column also lands directly — only the label differs:
@@ -38,13 +41,17 @@ export default function TaskColumn({ title, emoji, tasks, editable, defaultOwner
         owner: defaultOwner,
         status: "active",
         requested_by: isMine ? null : meSlot,
+        due: dueTime || null,
       }),
       toast,
       isMine ? "Added to the list"
         : isOrder ? `Ordered onto ${partnerName || "Ben"}'s list 👑`
         : `Requested on ${partnerName || "your partner"}'s list 💌`
     );
-    if (ok) setTitle("");
+    if (ok) {
+      setTitle("");
+      setDueTime("");
+    }
   };
 
   const approve = async (task) => {
@@ -196,6 +203,18 @@ export default function TaskColumn({ title, emoji, tasks, editable, defaultOwner
               ) : (
                 <span className={`flex-1 text-sm ${t.done ? "line-through" : ""}`}>
                   {t.title}
+                  {t.date !== today && (
+                    <span className="ml-1.5 px-1.5 py-0.5 rounded-full bg-line/60 text-[9px] font-bold uppercase tracking-wide text-wine/60 align-middle">
+                      ↩ {t.date === shiftDayStr(-1) ? "yesterday" : fmtDate(t.date)}
+                    </span>
+                  )}
+                  {t.due && !t.done && (
+                    <span className={`ml-1.5 px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wide align-middle ${
+                      isTaskOverdue(t) ? "bg-rose-deep/20 text-rose-deep" : "bg-blush text-wine/70"
+                    }`}>
+                      ⏰ {fmtTime(t.due)}{isTaskOverdue(t) ? " late!" : ""}
+                    </span>
+                  )}
                   {t.requested_by && (
                     <span className="ml-1.5 px-1.5 py-0.5 rounded-full bg-gold/50 text-[9px] font-bold uppercase tracking-wide text-wine align-middle">
                       {t.requested_by === "b" ? "👑 ordered" : "💌 requested"} by{" "}
@@ -241,6 +260,26 @@ export default function TaskColumn({ title, emoji, tasks, editable, defaultOwner
             value={title_}
             onChange={(e) => setTitle(e.target.value)}
           />
+          <button
+            type="button"
+            onClick={() => setShowDue((v) => !v)}
+            className={`shrink-0 p-2 rounded-full transition-colors ${
+              showDue || dueTime ? "text-rose-deep bg-blush" : "text-rose/60 hover:text-rose-deep"
+            }`}
+            aria-label="Set a time limit"
+            title="Set a time limit"
+          >
+            <Clock size={15} />
+          </button>
+          {showDue && (
+            <input
+              type="time"
+              className="input-love text-sm w-24 px-2"
+              value={dueTime}
+              onChange={(e) => setDueTime(e.target.value)}
+              aria-label="Due time"
+            />
+          )}
           <VoiceButton onResult={(t) => setTitle((v) => appendVoice(v, t))} />
           <button
             className="btn-love px-3"

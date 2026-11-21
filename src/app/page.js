@@ -11,7 +11,9 @@ import { useTable } from "@/lib/db";
 import { usePeople } from "@/lib/people";
 import { otherSlot } from "@/lib/identity";
 import { letterUnlocked } from "@/lib/letters";
-import { todayStr } from "@/lib/dates";
+import { isTaskOverdue, shiftDayStr, todayStr } from "@/lib/dates";
+import { useEffect, useRef } from "react";
+import { useToast } from "@/lib/toast";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import { useHydrated } from "@/lib/useHydrated";
 import { PHOTO_US } from "@/lib/photos";
@@ -21,8 +23,10 @@ import PhotoStand from "@/components/PhotoStand";
 
 export default function Home() {
   const { me, mePerson, partner } = usePeople();
+  const toast = useToast();
+  // today + the last 2 days — unfinished tasks carry forward
   const { rows: tasks } = useTable("tasks", {
-    filter: (q) => q.eq("date", todayStr()),
+    filter: (q) => q.gte("date", shiftDayStr(-2)).lte("date", todayStr()),
   });
   const { rows: events } = useTable("events", {
     filter: (q) => q.eq("date", todayStr()),
@@ -31,6 +35,36 @@ export default function Home() {
   const { rows: moods } = useTable("moods", { order: "updated_at" });
 
   const slot = me?.slot || "a";
+
+  // love-nudge: when one of my (or our) tasks slips past its due time,
+  // toast a soft reminder — once per task per session, checked every minute
+  const nudged = useRef(new Set());
+  useEffect(() => {
+    const NUDGES = [
+      `🥺 "{title}" is still waiting — finish it for {who}?`,
+      `💗 {who}, "{title}" needs you — one small push and it's done`,
+      `😘 "{title}" slipped past its time — finish it for me, love?`,
+      `🌙 "{title}" is running late — do it and I owe you a hug`,
+      `🫶 {who}, don't forget "{title}" — I'm cheering for you`,
+    ];
+    const check = () => {
+      for (const t of tasks) {
+        if (!isTaskOverdue(t) || nudged.current.has(t.id)) continue;
+        if (t.owner !== slot && t.owner !== "shared") continue;
+        nudged.current.add(t.id);
+        const who = t.owner === "shared" ? "us" : mePerson?.name || "you";
+        toast(
+          NUDGES[Math.floor(Math.random() * NUDGES.length)]
+            .replace("{title}", t.title)
+            .replace("{who}", who)
+        );
+      }
+    };
+    check();
+    const iv = setInterval(check, 60_000);
+    return () => clearInterval(iv);
+  }, [tasks, slot, mePerson, toast]);
+
   const mine = tasks.filter((t) => t.owner === slot);
   const theirs = tasks.filter((t) => t.owner === otherSlot(slot));
   const ours = tasks.filter((t) => t.owner === "shared");
