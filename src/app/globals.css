@@ -110,6 +110,89 @@
   --font-heading: var(--font-fraunces);
 }
 
+/* ---------- Kingdom of Corona (Tangled-inspired) ---------- */
+
+/* corona-day — soft lavender daylight over the kingdom */
+:root[data-theme="corona-day"] {
+  --tangled-bg: #fcf9ff;
+  --tangled-surface: #f3e8ff;
+  --tangled-primary: #6b21a8;
+  --tangled-primary-hover: #581c87;
+  --tangled-accent: #f59e0b;
+  --tangled-accent-soft: #fef3c7;
+  --tangled-secondary: #db2777;
+  --tangled-text: #2e1065;
+  --tangled-muted: #6b7280;
+  --tangled-border: #e9d5ff;
+
+  --background: var(--tangled-bg);
+  --foreground: var(--tangled-text);
+  --card: #ffffff;
+  --field: #ffffff;
+  --line: var(--tangled-border);
+  --soft: var(--tangled-surface);
+  --accent: var(--tangled-primary);
+  --accent-2: var(--tangled-primary-hover);
+  --on-accent: #ffffff;
+  --deep: #4c1d95;
+  --cream: #fffdf4;
+  --lav: #ddd6fe;
+  --gold: var(--tangled-accent);
+  --desk: #241040;
+  --overlay: rgba(46, 16, 101, 0.35);
+  --shadow: rgba(107, 33, 168, 0.1);
+  --font-heading: var(--font-cinzel);
+  --font-body: var(--font-jakarta);
+}
+
+:root[data-theme="corona-day"] body {
+  background:
+    radial-gradient(1100px 700px at 85% -10%, rgba(245, 158, 11, 0.08), transparent 55%),
+    radial-gradient(900px 650px at 5% 0%, rgba(168, 85, 247, 0.1), transparent 55%),
+    var(--background);
+}
+
+/* lantern-night — the floating lantern festival over a midnight violet sky */
+:root[data-theme="lantern-night"] {
+  --tangled-bg: #130924;
+  --tangled-surface: #1f1138;
+  --tangled-primary: #a855f7;
+  --tangled-primary-hover: #c084fc;
+  --tangled-accent: #fbbf24;
+  --tangled-accent-soft: #451a03;
+  --tangled-secondary: #f472b6;
+  --tangled-text: #faf5ff;
+  --tangled-muted: #c4b5fd;
+  --tangled-border: #3b2063;
+
+  --background: var(--tangled-bg);
+  --foreground: var(--tangled-text);
+  --card: var(--tangled-surface);
+  --field: #2a1a4c;
+  --line: var(--tangled-border);
+  --soft: #2a1a4c;
+  --accent: var(--tangled-primary);
+  --accent-2: var(--tangled-primary-hover);
+  --on-accent: #1f1138;
+  --deep: #faf5ff;
+  --cream: #251645;
+  --lav: #c4b5fd;
+  --gold: var(--tangled-accent);
+  --desk: #0a0518;
+  --overlay: rgba(9, 4, 20, 0.65);
+  --shadow: rgba(0, 0, 0, 0.45);
+  --font-heading: var(--font-cinzel);
+  --font-body: var(--font-jakarta);
+}
+
+:root[data-theme="lantern-night"] body {
+  background:
+    radial-gradient(1100px 700px at 80% -10%, rgba(251, 191, 36, 0.12), transparent 55%),
+    radial-gradient(900px 700px at 10% 5%, rgba(168, 85, 247, 0.18), transparent 60%),
+    radial-gradient(1400px 900px at 50% 110%, rgba(59, 32, 99, 0.55), transparent 70%),
+    var(--background);
+}
+
 /* ---------- Token mapping ---------- */
 
 @theme inline {
@@ -144,7 +227,7 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-quicksand), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-body, var(--font-quicksand)), ui-sans-serif, system-ui, sans-serif;
   transition: background 0.4s ease, color 0.4s ease;
 }
 
@@ -242,5 +325,132 @@ body {
   60%,
   100% {
     transform: translateX(320%);
+  }
+}
+
+/* ---------- Lantern glow & Corona ornaments ---------- */
+
+/* the signature floating-lantern glow — use sparingly, on things that matter */
+.lantern-glow {
+  box-shadow: 0 0 20px rgba(251, 191, 36, 0.35);
+}
+
+.lantern-glow-soft {
+  box-shadow:
+    0 0 14px rgba(251, 191, 36, 0.22),
+    0 4px 18px var(--shadow);
+}
+
+/* primary actions glow gently at lantern-night */
+:root[data-theme="lantern-night"] .btn-love {
+  box-shadow:
+    0 0 16px rgba(251, 191, 36, 0.22),
+    0 4px 14px color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+/* thin golden ornamental divider with a sun-crest centre */
+.sun-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--gold);
+}
+
+.sun-divider::before,
+.sun-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--gold) 60%, transparent), transparent);
+}
+
+/* warm parchment surface for the recipe library */
+.parchment {
+  background:
+    radial-gradient(600px 300px at 50% -20%, color-mix(in srgb, var(--gold) 10%, transparent), transparent 70%),
+    var(--cream);
+  border: 1px solid color-mix(in srgb, var(--gold) 35%, var(--line));
+  border-radius: 1.25rem;
+  box-shadow: 0 4px 24px var(--shadow);
+}
+
+/* a completed task gets one soft golden pulse — no confetti storm */
+@keyframes task-complete-glow {
+  0% {
+    box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.5);
+  }
+  60% {
+    box-shadow: 0 0 18px 6px rgba(251, 191, 36, 0.35);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(251, 191, 36, 0);
+  }
+}
+
+.task-complete-glow {
+  animation: task-complete-glow 0.9s ease-out;
+}
+
+/* floating lanterns rising through the twilight */
+@keyframes lantern-float {
+  0% {
+    transform: translateY(0) translateX(0) rotate(-1.5deg);
+  }
+  50% {
+    transform: translateY(-14px) translateX(4px) rotate(1.5deg);
+  }
+  100% {
+    transform: translateY(0) translateX(0) rotate(-1.5deg);
+  }
+}
+
+@keyframes lantern-flicker {
+  0%,
+  100% {
+    opacity: 0.85;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.lantern-float {
+  animation: lantern-float 6s ease-in-out infinite;
+}
+
+.lantern-flicker {
+  animation: lantern-flicker 3.5s ease-in-out infinite;
+}
+
+/* tiny stars over the festival sky */
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 0.2;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.1);
+  }
+}
+
+.star-twinkle {
+  animation: twinkle 3s ease-in-out infinite;
+}
+
+/* glowing dot used on progress indicators / milestones */
+.glow-dot {
+  box-shadow: 0 0 10px rgba(251, 191, 36, 0.55), 0 0 3px rgba(251, 191, 36, 0.8);
+}
+
+/* keep the magic calm for anyone who prefers reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .lantern-float,
+  .lantern-flicker,
+  .star-twinkle,
+  .task-complete-glow,
+  .love-shimmer {
+    animation: none;
   }
 }

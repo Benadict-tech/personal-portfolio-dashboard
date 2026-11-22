@@ -11,7 +11,7 @@ import { useTable } from "@/lib/db";
 import { usePeople } from "@/lib/people";
 import { otherSlot } from "@/lib/identity";
 import { letterUnlocked } from "@/lib/letters";
-import { isTaskOverdue, shiftDayStr, todayStr } from "@/lib/dates";
+import { isTaskOverdue, shiftDayStr, taskLateLevel, todayStr } from "@/lib/dates";
 import { useEffect, useRef, useState } from "react";
 import { useToast } from "@/lib/toast";
 import { isSupabaseConfigured } from "@/lib/supabase";
@@ -46,8 +46,8 @@ export default function Home() {
   const shown = [...tasks, ...justDone.filter((j) => !tasks.some((t) => t.id === j.id))];
 
   // love-nudge: when one of my (or our) tasks slips past its due time,
-  // toast a soft reminder — once per task per session, checked every minute
-  const nudged = useRef(new Set());
+  // toast a soft reminder — again, more urgent, when it gets very late
+  const nudged = useRef(new Map()); // task id -> highest level nudged
   useEffect(() => {
     const NUDGES = [
       `🥺 "{title}" is still waiting — finish it for {who}?`,
@@ -58,15 +58,21 @@ export default function Home() {
     ];
     const check = () => {
       for (const t of tasks) {
-        if (!isTaskOverdue(t) || nudged.current.has(t.id)) continue;
+        if (!isTaskOverdue(t)) continue;
         if (t.owner !== slot && t.owner !== "shared") continue;
-        nudged.current.add(t.id);
+        const level = taskLateLevel(t);
+        if (level <= (nudged.current.get(t.id) || 0)) continue;
+        nudged.current.set(t.id, level);
         const who = t.owner === "shared" ? "us" : mePerson?.name || "you";
-        toast(
-          NUDGES[Math.floor(Math.random() * NUDGES.length)]
-            .replace("{title}", t.title)
-            .replace("{who}", who)
-        );
+        if (level >= 3) {
+          toast(`🚨 "{t.title}" has been waiting so long, {who} — rescue it?`.replace("{who}", who), "error");
+        } else {
+          toast(
+            NUDGES[Math.floor(Math.random() * NUDGES.length)]
+              .replace("{title}", t.title)
+              .replace("{who}", who)
+          );
+        }
       }
     };
     check();

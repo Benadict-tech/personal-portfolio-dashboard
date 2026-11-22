@@ -195,6 +195,110 @@ create table if not exists games (
   updated_at timestamptz not null default now()
 );
 
+-- ============ 90-day hair health & regrowth program ============
+-- Activity-based: every task belongs to a local calendar day, not a clock
+-- time. suggested_time is informational only; tasks stay open until the
+-- day ends, then eligible leftovers become 'missed'.
+
+-- One singleton row: when the journey begins + which dates are a planned break
+create table if not exists program_settings (
+  id int primary key default 1 check (id = 1),
+  start_date date not null,
+  total_days int not null default 90,
+  break_dates jsonb not null default '[]'::jsonb, -- ['YYYY-MM-DD', ...]
+  created_at timestamptz not null default now()
+);
+
+-- The calendar spine: one row per calendar date in the journey window.
+-- Planned-break days have is_break = true and no day_number (excluded from
+-- the 90 program days and from task generation).
+create table if not exists program_days (
+  id bigint generated always as identity primary key,
+  calendar_date date not null unique,
+  day_number int, -- null on planned-break days
+  is_break boolean not null default false,
+  label text not null default '',
+  created_at timestamptz not null default now()
+);
+
+-- The activity checklist. `user_id` holds the heart slot ('a'/'b') so each
+-- partner's tasks stay fully independent.
+create table if not exists program_tasks (
+  id bigint generated always as identity primary key,
+  user_id text not null check (user_id in ('a', 'b')),
+  program_day_id bigint references program_days(id) on delete cascade,
+  activity_name text not null,
+  description text not null default '',
+  category text not null default 'anytime',
+  suggested_time text not null default 'anytime'
+    check (suggested_time in ('morning', 'afternoon', 'evening', 'anytime')),
+  frequency text not null default 'once',
+  scheduled_date date not null,
+  due_date date not null, -- local calendar day the activity stays open until
+  quantity numeric,
+  unit text not null default '',
+  instructions text not null default '',
+  benefits text not null default '',
+  completion_status text not null default 'pending'
+    check (completion_status in
+      ('pending', 'completed', 'skipped', 'missed', 'not_applicable', 'planned_break')),
+  completed_at timestamptz, -- the REAL moment it was done — never clock-locked
+  completed_quantity numeric,
+  skip_reason text not null default '',
+  notes text not null default '',
+  is_mandatory boolean not null default false,
+  is_medical boolean not null default false,
+  is_reschedulable boolean not null default true,
+  contributes_to_score boolean not null default true,
+  min_interval_minutes int, -- clinician-specified spacing for medical tasks
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists program_tasks_user_date_idx
+  on program_tasks (user_id, scheduled_date);
+create index if not exists program_tasks_med_idx
+  on program_tasks (user_id, is_medical, completed_at)
+  where is_medical;
+
+-- Every actual medication/treatment application, for interval safety —
+-- used to warn about duplicate applications. Never auto-reschedule meds.
+create table if not exists med_logs (
+  id bigint generated always as identity primary key,
+  user_id text not null check (user_id in ('a', 'b')),
+  task_id bigint references program_tasks(id) on delete cascade,
+  activity_name text not null,
+  applied_at timestamptz not null default now(),
+  created_at timestamptz not null default now()
+);
+
+create index if not exists med_logs_user_activity_idx
+  on med_logs (user_id, activity_name, applied_at desc);
+
+-- Little lantern notes partners send each other on the journey
+create table if not exists encouragements (
+  id bigint generated always as identity primary key,
+  from_slot text not null check (from_slot in ('a', 'b')),
+  to_slot text not null check (to_slot in ('a', 'b')),
+  message text not null,
+  created_at timestamptz not null default now()
+);
+
+-- keep updated_at honest on every task change
+create or replace function public.touch_program_task()
+returns trigger
+language plpgsql
+as $$
+begin
+  new.updated_at = now();
+  return new;
+end $$;
+
+drop trigger if exists program_tasks_touch on program_tasks;
+create trigger program_tasks_touch
+  before update on program_tasks
+  for each row execute function public.touch_program_task();
+
 alter table people enable row level security;
 alter table tasks enable row level security;
 alter table events enable row level security;
@@ -211,6 +315,11 @@ alter table love_log enable row level security;
 alter table letters enable row level security;
 alter table itinerary_items enable row level security;
 alter table games enable row level security;
+alter table program_settings enable row level security;
+alter table program_days enable row level security;
+alter table program_tasks enable row level security;
+alter table med_logs enable row level security;
+alter table encouragements enable row level security;
 
 -- True only for a logged-in user who has claimed a heart. SECURITY DEFINER so
 -- it can read `people` without recursing through that table's own policies.
@@ -231,7 +340,7 @@ grant execute on function public.is_member() to authenticated;
 do $$
 declare t text;
 begin
-  foreach t in array array['people','tasks','events','visits','milestones','savings_goals','budget_items','moods','focus_sessions','projects','project_tasks','love_meter','love_log','letters','itinerary_items','games'] loop
+  foreach t in array array['people','tasks','events','visits','milestones','savings_goals','budget_items','moods','focus_sessions','projects','project_tasks','love_meter','love_log','letters','itinerary_items','games','program_settings','program_days','program_tasks','med_logs','encouragements'] loop
     execute format('drop policy if exists %I on %I', 'anon all ' || t, t);
     execute format('drop policy if exists %I on %I', 'members all ' || t, t);
     if t <> 'people' then
@@ -257,7 +366,7 @@ create policy "people claim or edit own" on people for update to authenticated
 do $$
 declare t text;
 begin
-  foreach t in array array['people','tasks','events','visits','milestones','savings_goals','budget_items','moods','focus_sessions','projects','project_tasks','love_meter','love_log','letters','itinerary_items','games'] loop
+  foreach t in array array['people','tasks','events','visits','milestones','savings_goals','budget_items','moods','focus_sessions','projects','project_tasks','love_meter','love_log','letters','itinerary_items','games','program_settings','program_days','program_tasks','med_logs','encouragements'] loop
     if not exists (
       select 1 from pg_publication_tables
       where pubname = 'supabase_realtime' and tablename = t

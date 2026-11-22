@@ -1,10 +1,12 @@
 import Script from "next/script";
 import {
+  Cinzel_Decorative,
   Cormorant_Garamond,
   Fraunces,
   Great_Vibes,
   Outfit,
   Playfair_Display,
+  Plus_Jakarta_Sans,
   Quicksand,
 } from "next/font/google";
 import "./globals.css";
@@ -22,6 +24,8 @@ const cormorant = Cormorant_Garamond({ variable: "--font-cormorant", weight: "60
 const playfair = Playfair_Display({ variable: "--font-playfair", weight: "600", subsets: ["latin"] });
 const outfit = Outfit({ variable: "--font-outfit", weight: "600", subsets: ["latin"] });
 const fraunces = Fraunces({ variable: "--font-fraunces", weight: "600", subsets: ["latin"] });
+const jakarta = Plus_Jakarta_Sans({ variable: "--font-jakarta", subsets: ["latin"] });
+const cinzel = Cinzel_Decorative({ variable: "--font-cinzel", weight: "700", subsets: ["latin"] });
 
 export const metadata = {
   title: "Us — Our Little World",
@@ -32,10 +36,10 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${quicksand.variable} ${greatVibes.variable} ${cormorant.variable} ${playfair.variable} ${outfit.variable} ${fraunces.variable} antialiased`}
+        className={`${quicksand.variable} ${greatVibes.variable} ${cormorant.variable} ${playfair.variable} ${outfit.variable} ${fraunces.variable} ${jakarta.variable} ${cinzel.variable} antialiased`}
       >
         <Script id="theme-init" strategy="beforeInteractive">
-          {`try{document.documentElement.dataset.theme=localStorage.getItem('us-theme')||'classic'}catch(e){}`}
+          {`try{document.documentElement.dataset.theme=localStorage.getItem('us-theme')||(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches?'lantern-night':'corona-day')}catch(e){}`}
         </Script>
         <ToastProvider>
           <FloatingHearts />

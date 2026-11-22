@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Check, Clock, Heart, Pencil, Plus, Send, X } from "lucide-react";
 import Avatar from "./Avatar";
@@ -10,7 +10,15 @@ import { runQuery } from "@/lib/db";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/lib/toast";
 import { heartConfetti } from "@/lib/confetti";
-import { fmtDate, fmtTime, isTaskOverdue, shiftDayStr, todayStr } from "@/lib/dates";
+import { daysLateOf, fmtDate, fmtTime, isTaskOverdue, shiftDayStr, todayStr } from "@/lib/dates";
+
+// how an undone task warms up the more DAYS it sits waiting —
+// 1 = from yesterday, 2 = two days, 3 = three or more
+const LATE_ROW = {
+  1: "border-lav bg-blush/40",
+  2: "border-gold/60 bg-gold/10",
+  3: "border-gold bg-gold/15 lantern-glow-soft",
+};
 
 export default function TaskColumn({ title, emoji, tasks, editable, defaultOwner, meSlot, partnerName, refresh, onTaskDone }) {
   const [title_, setTitle] = useState("");
@@ -20,6 +28,13 @@ export default function TaskColumn({ title, emoji, tasks, editable, defaultOwner
   const [editText, setEditText] = useState("");
   const toast = useToast();
   const today = todayStr();
+
+  // re-render every minute so "late!" chips flip on their own
+  const [, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const iv = setInterval(() => setNow(new Date()), 60_000);
+    return () => clearInterval(iv);
+  }, []);
 
   // "mine" = my column or the shared one — those accept tasks directly.
   // Adding to the partner's column also lands directly — only the label differs:
@@ -189,7 +204,7 @@ export default function TaskColumn({ title, emoji, tasks, editable, defaultOwner
               className={`flex items-center gap-2.5 p-2.5 rounded-xl border transition-colors ${
                 t.done
                   ? "border-line bg-blush/50 opacity-60"
-                  : "border-line bg-card"
+                  : LATE_ROW[Math.min(3, daysLateOf(t))] || "border-line bg-card"
               }`}
             >
               <button
@@ -218,14 +233,14 @@ export default function TaskColumn({ title, emoji, tasks, editable, defaultOwner
                   {t.title}
                   {t.date !== today && (
                     <span className="ml-1.5 px-1.5 py-0.5 rounded-full bg-line/60 text-[9px] font-bold uppercase tracking-wide text-wine/60 align-middle">
-                      ↩ {t.date === shiftDayStr(-1) ? "yesterday" : fmtDate(t.date)}
+                      ↩ {t.date === shiftDayStr(-1) ? "yesterday" : `${daysLateOf(t)} days · ${fmtDate(t.date)}`}
                     </span>
                   )}
                   {t.due && !t.done && (
                     <span className={`ml-1.5 px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wide align-middle ${
                       isTaskOverdue(t) ? "bg-rose-deep/20 text-rose-deep" : "bg-blush text-wine/70"
                     }`}>
-                      ⏰ {fmtTime(t.due)}{isTaskOverdue(t) ? " late!" : ""}
+                      ⏰ {fmtTime(t.due)}{isTaskOverdue(t) ? " · late!" : ""}
                     </span>
                   )}
                   {t.requested_by && (

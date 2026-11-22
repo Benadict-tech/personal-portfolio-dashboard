@@ -3,13 +3,15 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
-import { CalendarDays, Coins, Gamepad2, Heart, LampDesk, ListTodo, LogOut, Mail, Map, Sparkles, Timer } from "lucide-react";
+import { CalendarDays, Coins, Gamepad2, Heart, LampDesk, ListTodo, LogOut, Mail, Map, Moon, Sparkles, Sun, Timer } from "lucide-react";
 import { usePeople } from "@/lib/people";
+import { useTangledTheme } from "@/lib/theme";
 import ThemePicker from "./ThemePicker";
 import Avatar from "./Avatar";
 
 const links = [
   { href: "/", label: "Today", icon: ListTodo },
+  { href: "/journey", label: "Journey", icon: Sun },
   { href: "/calendar", label: "Calendar", icon: CalendarDays },
   { href: "/future", label: "Future", icon: Sparkles },
   { href: "/money", label: "Money", icon: Coins },
@@ -23,6 +25,7 @@ const links = [
 export default function NavBar() {
   const pathname = usePathname();
   const { me, partner, signOut } = usePeople();
+  const { isNight, toggleMode } = useTangledTheme();
 
   return (
     <header className="sticky top-0 z-40 backdrop-blur-md bg-background/85 border-b border-line">
@@ -80,6 +83,14 @@ export default function NavBar() {
               <LogOut size={16} />
             </button>
           )}
+          <button
+            onClick={toggleMode}
+            title={isNight ? "Switch to Corona Day" : "Switch to Lantern Night"}
+            aria-label="Toggle day and night mode"
+            className="p-2 rounded-full text-wine hover:bg-blush transition-colors"
+          >
+            {isNight ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
           <ThemePicker />
         </div>
       </div>
