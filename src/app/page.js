@@ -12,7 +12,7 @@ import { usePeople } from "@/lib/people";
 import { otherSlot } from "@/lib/identity";
 import { letterUnlocked } from "@/lib/letters";
 import { isTaskOverdue, shiftDayStr, todayStr } from "@/lib/dates";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useToast } from "@/lib/toast";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import { useHydrated } from "@/lib/useHydrated";
@@ -35,6 +35,15 @@ export default function Home() {
   const { rows: moods } = useTable("moods", { order: "updated_at" });
 
   const slot = me?.slot || "a";
+
+  // tasks completed this session stay visible until midnight — even carried
+  // ones, which the query drops the moment they flip to done
+  const [justDone, setJustDone] = useState([]);
+  const onTaskDone = (t) =>
+    setJustDone((prev) =>
+      prev.some((p) => p.id === t.id) ? prev : [...prev, { ...t, done: true }]
+    );
+  const shown = [...tasks, ...justDone.filter((j) => !tasks.some((t) => t.id === j.id))];
 
   // love-nudge: when one of my (or our) tasks slips past its due time,
   // toast a soft reminder — once per task per session, checked every minute
@@ -65,9 +74,9 @@ export default function Home() {
     return () => clearInterval(iv);
   }, [tasks, slot, mePerson, toast]);
 
-  const mine = tasks.filter((t) => t.owner === slot);
-  const theirs = tasks.filter((t) => t.owner === otherSlot(slot));
-  const ours = tasks.filter((t) => t.owner === "shared");
+  const mine = shown.filter((t) => t.owner === slot);
+  const theirs = shown.filter((t) => t.owner === otherSlot(slot));
+  const ours = shown.filter((t) => t.owner === "shared");
 
   const myMood = me && moods.find((m) => m.slot === me.slot)?.mood;
   const unlockedLetters = letters.filter(
@@ -165,6 +174,7 @@ export default function Home() {
             meSlot={me?.slot}
             partnerName={partner?.name}
             refresh={refreshTasks}
+            onTaskDone={onTaskDone}
           />
         </Fade>
         <Fade delay={0.3}>
@@ -177,6 +187,7 @@ export default function Home() {
             meSlot={me?.slot}
             partnerName={partner?.name}
             refresh={refreshTasks}
+            onTaskDone={onTaskDone}
           />
         </Fade>
         <Fade delay={0.4}>
@@ -189,6 +200,7 @@ export default function Home() {
             meSlot={me?.slot}
             partnerName={partner?.name}
             refresh={refreshTasks}
+            onTaskDone={onTaskDone}
           />
         </Fade>
       </div>

@@ -12,7 +12,7 @@ import { useToast } from "@/lib/toast";
 import { heartConfetti } from "@/lib/confetti";
 import { fmtDate, fmtTime, isTaskOverdue, shiftDayStr, todayStr } from "@/lib/dates";
 
-export default function TaskColumn({ title, emoji, tasks, editable, defaultOwner, meSlot, partnerName, refresh }) {
+export default function TaskColumn({ title, emoji, tasks, editable, defaultOwner, meSlot, partnerName, refresh, onTaskDone }) {
   const [title_, setTitle] = useState("");
   const [dueTime, setDueTime] = useState("");
   const [showDue, setShowDue] = useState(false);
@@ -90,7 +90,10 @@ export default function TaskColumn({ title, emoji, tasks, editable, defaultOwner
       toast,
       !task.done ? "Task done! ✨" : null
     );
-    if (ok) refresh?.();
+    if (ok) {
+      refresh?.();
+      if (!task.done) onTaskDone?.(task);
+    }
     if (ok && !task.done && defaultOwner === "shared") heartConfetti();
   };
 
