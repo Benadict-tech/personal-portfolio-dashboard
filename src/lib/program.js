@@ -819,8 +819,12 @@ export async function saveTaskDetails(task, { notes, quantity }) {
 
 // ---------- analytics (completion, not punctuality) ----------
 
+// Scoreable tasks: not opted out, not break/na days, and not in the future —
+// a task scheduled for next week must never drag down today's percentages.
 const eligible = (t) =>
-  t.contributes_to_score && !["not_applicable", "planned_break"].includes(t.completion_status);
+  t.contributes_to_score &&
+  !["not_applicable", "planned_break"].includes(t.completion_status) &&
+  t.scheduled_date <= todayStr();
 
 export function summarize(tasks) {
   const el = tasks.filter(eligible);
@@ -874,6 +878,64 @@ export function dailySeries(tasks) {
 export function rollingConsistency(tasks, nDays) {
   const from = format(addDays(new Date(), -nDays + 1), "yyyy-MM-dd");
   return summarize(tasks.filter((t) => t.scheduled_date >= from)).pct;
+}
+
+// consecutive "active days" (≥1 activity completed) — counted over days that
+// actually have tasks, so planned breaks never break a streak
+export function streaks(tasks) {
+  const active = dailySeries(tasks)
+    .filter((d) => d.done > 0)
+    .map((d) => d.date);
+  let best = 0;
+  let cur = 0;
+  let prev = null;
+  for (const date of active) {
+    // consecutive program days (break days are absent, so they don't reset)
+    cur = prev && differenceDays(prev, date) === 1 ? cur + 1 : 1;
+    best = Math.max(best, cur);
+    prev = date;
+  }
+  // "current" streak = trailing run ending at the most recent active day,
+  // still alive if that day is today or yesterday
+  const last = active[active.length - 1];
+  const alive = last && differenceDays(last, todayStr()) <= 1;
+  return { current: alive ? cur : 0, best };
+}
+
+function differenceDays(a, b) {
+  return Math.round(
+    (new Date(b + "T00:00:00") - new Date(a + "T00:00:00")) / 86400000
+  );
+}
+
+// medication adherence % per week (Mon-start) — the trend clinicians ask for
+export function weeklyMedSeries(tasks) {
+  const byWeek = new Map();
+  for (const t of tasks) {
+    if (!t.is_medical || !eligible(t)) continue;
+    const d = new Date(t.scheduled_date + "T00:00:00");
+    const monday = addDays(d, -((d.getDay() + 6) % 7));
+    const wk = format(monday, "MMM d");
+    const v = byWeek.get(wk) || { total: 0, done: 0 };
+    v.total++;
+    if (t.completion_status === "completed") v.done++;
+    byWeek.set(wk, v);
+  }
+  return [...byWeek.entries()].map(([week, v]) => ({
+    week,
+    pct: Math.round((v.done / v.total) * 100),
+  }));
+}
+
+// how many program days saw BOTH partners finish at least one activity
+export function daysTogetherCount(myTasks, partnerTasks) {
+  const theirs = new Set(
+    partnerTasks.filter((t) => t.completion_status === "completed").map((t) => t.scheduled_date)
+  );
+  const mine = new Set(
+    myTasks.filter((t) => t.completion_status === "completed").map((t) => t.scheduled_date)
+  );
+  return [...mine].filter((d) => theirs.has(d)).length;
 }
 
 // ---------- encouragements ----------

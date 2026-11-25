@@ -207,7 +207,12 @@ export default function JourneyPage() {
 
       {tab === "progress" && (
         <Fade key="progress">
-          <ProgressCharts tasks={myAll} person={mePerson} />
+          <ProgressCharts
+            myTasks={myAll}
+            partnerTasks={partnerAll}
+            me={mePerson}
+            partner={partner}
+          />
         </Fade>
       )}
 
